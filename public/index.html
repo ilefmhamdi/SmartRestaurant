@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOIR — Fine Dining</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2 class="sr-only">NOIR — Advanced E-Restaurant Website featuring menu, reservations, order tracking, loyalty rewards, and more.</h2>
+
+<!-- Custom Cursor -->
+<div class="custom-cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- Navigation -->
+<nav id="navbar">
+  <div class="nav-logo" onclick="scrollTo(0,0)"><a onclick="scrollSec('hero')">NOIR <span>·</span> fine dining</a></div>
+  <div class="nav-links">
+    <a onclick="scrollSec('menu')">Menu</a>
+    <a onclick="scrollSec('reservation')">Reserve</a>
+    <a class="client-only hidden" onclick="scrollSec('loyalty')">Loyalty</a>
+    <a class="client-only hidden" onclick="scrollSec('offers')">Offers</a>
+    <a onclick="scrollSec('chef')">Chef</a>
+    <a onclick="scrollSec('about')">About us</a>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" id="authBtn" onclick="openAuthModal('login')"><i class="fas fa-user"></i> Login</button>
+    <button class="nav-btn hidden" id="clientLogoutBtn" onclick="logoutClient()">Logout</button>
+    <div class="nav-btn" onclick="openOrderModal()">Order</div>
+    <div class="nav-btn" onclick="openReservationModal('reserve')">Reserve Table</div>
+    <div class="nav-account" id="accountBtn" onclick="openAccountModal()"><i class="fa-solid fa-circle-user"></i></div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Est. 2015 · Michelin <i class="fas fa-star"></i><i class="fas fa-star"></i></p>
+    <h1 class="hero-title">Where <em>Darkness</em><br>Meets Light</h1>
+    <p class="hero-sub">A culinary journey beyond the ordinary</p>
+    <div class="hero-ctas">
+      <button class="btn-primary" onclick="scrollSec('menu')">Explore Menu</button>
+      <button class="btn-ghost" onclick="scrollSec('reservation')">Book a Table</button>
+      <button class="btn-ghost" onclick="scrollSec('menu')">Order Now</button>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-num">12</div><div class="hero-stat-label">Years of Excellence</div></div>
+    <div class="hero-stat"><div class="hero-stat-num"><i class="fas fa-star"></i><i class="fas fa-star"></i></div><div class="hero-stat-label">Michelin Stars</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">4.9</div><div class="hero-stat-label">Guest Rating</div></div>
+  </div>
+  <div class="hero-scroll"><div class="scroll-line"></div><div class="scroll-text">Scroll</div></div>
+</section>
+
+<!-- Weather Bar -->
+<div class="weather-bar" id="weatherBar">
+  <div class="weather-item"><i class="fas fa-moon"></i> <span>Ce soir: Excellent, 26°C</span></div>
+  <div class="weather-item"><i class="fas fa-clock"></i> <span>Ouvert jusqu'à minuit</span></div>
+  <div class="weather-item"><i class="fas fa-location-dot"></i> <span>Avenue Bourguiba, Tunis 1000</span></div>
+  <div class="weather-item"><i class="fas fa-phone"></i> <span>+216 71 240 240</span></div>
+</div>
+
+<!-- Menu -->
+<section id="menu">
+  <div class="menu-header">
+    <div>
+      <p class="section-eyebrow">Culinary Creations</p>
+      <h2 class="section-title">Our <em>Signature</em> Menu</h2>
+      <p class="section-sub">Each dish crafted with seasonal ingredients, locally sourced and prepared with classical French technique.</p>
+    </div>
+    <div class="menu-filters">
+      <button class="filter-btn active" onclick="filterMenu('all',this)">All</button>
+      <button class="filter-btn" onclick="filterMenu('starters',this)">Starters</button>
+      <button class="filter-btn" onclick="filterMenu('mains',this)">Mains</button>
+      <button class="filter-btn" onclick="filterMenu('desserts',this)">Desserts</button>
+      <button class="filter-btn" onclick="filterMenu('drinks',this)">Drinks</button>
+      <button class="filter-btn" onclick="filterMenu('veg',this)">Vegetarian</button>
+    </div>
+  </div>
+  <div class="menu-grid" id="menuGrid"></div>
+</section>
+
+<!-- Reservation Section — CTA only, form lives in popup -->
+<section id="reservation">
+  <div class="reservation-deco"></div>
+  <div class="reservation-deco2"></div>
+  <div class="reservation-layout">
+    <div class="res-info fade-in">
+      <p class="section-eyebrow">Book Your Evening</p>
+      <h2 class="section-title">Reserve <em>Your</em><br>Table</h2>
+      <div class="divider"></div>
+      <p class="section-sub">Secure your spot for an unforgettable evening. Private dining rooms available for special occasions.</p>
+      <div class="res-features">
+        <div class="res-feature"><div class="res-icon"><i class="fas fa-fire"></i></div><div class="res-feature-text"><strong>Candlelit Atmosphere</strong><br>Every table thoughtfully arranged</div></div>
+        <div class="res-feature"><div class="res-icon"><i class="fas fa-wine-glass"></i></div><div class="res-feature-text"><strong>Sommelier on Call</strong><br>Expert cocktail pairing available</div></div>
+        <div class="res-feature"><div class="res-icon"><i class="fas fa-birthday-cake"></i></div><div class="res-feature-text"><strong>Special Occasions</strong><br>We take care of every detail</div></div>
+        <div class="res-feature"><div class="res-icon"><i class="fas fa-car"></i></div><div class="res-feature-text"><strong>Valet Parking</strong><br>Complimentary for all guests</div></div>
+      </div>
+    </div>
+    <div class="res-cta-card">
+      <div>
+        <p class="section-eyebrow">Reserve with ease</p>
+        <h3 class="section-title" style="font-size:2rem;margin-top:0">Book <em>Your</em> Table</h3>
+        <p class="section-sub">Your complete reservation form — including dish pre-selection, allergy notes, and your booking history — opens in a popup.</p>
+      </div>
+      <div class="res-cta-features">
+        <div class="res-cta-feat"><i class="fas fa-calendar-check"></i>Choose date, time &amp; dining experience</div>
+        <div class="res-cta-feat"><i class="fas fa-utensils"></i>Pre-select dishes from the menu</div>
+        <div class="res-cta-feat"><i class="fas fa-triangle-exclamation"></i>Declare allergies &amp; special requests</div>
+        <div class="res-cta-feat"><i class="fas fa-list"></i>View &amp; cancel your existing reservations</div>
+      </div>
+      <button class="submit-btn" type="button" onclick="openReservationModal('reserve')">
+        <i class="fas fa-calendar-plus"></i> Open Reservation Popup
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Loyalty Program -->
+<section id="loyalty" class="client-only hidden">
+  <div class="fade-in">
+    <p class="section-eyebrow">Member Rewards</p>
+    <h2 class="section-title">The NOIR <em>Circle</em></h2>
+    <div class="divider"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:4rem;align-items:start;margin-top:2rem">
+    <div class="fade-in">
+      <div class="loyalty-card">
+        <div class="loyalty-card-deco"></div>
+        <div class="loyalty-card-deco2"></div>
+        <div class="loyalty-tier" id="loyaltyTier">Member Preview</div>
+        <div class="loyalty-name" id="loyaltyName">NOIR Circle Member</div>
+        <div style="margin-top:1.5rem">
+          <div class="loyalty-points" id="loyaltyPoints">0</div>
+          <div class="loyalty-points-label">Points Accumulated</div>
+        </div>
+        <div class="loyalty-bar"><div class="loyalty-progress" id="loyaltyBar"></div></div>
+        <div class="loyalty-next"><span id="loyaltyCurrentTier">Current: Bronze</span><span id="loyaltyToNextTier">0 pts to next tier</span></div>
+        <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border);display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted)">
+          <span>Member perks preview</span><span style="color:var(--gold)">SAMPLE CARD</span>
+        </div>
+      </div>
+      <div style="background:var(--dark);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-top:1rem">
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:1rem">Recent Activity</div>
+        <div id="loyaltyActivity" style="display:flex;flex-direction:column;gap:0.5rem">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted)"><span>No activity yet</span><span style="color:var(--text-dim)">0 pts</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="fade-in">
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.8">Earn points with every visit, unlock exclusive perks, and enjoy privileges reserved for our most valued guests.</div>
+      <div class="perks-grid">
+        <div class="perk-card"><div class="perk-icon"><i class="fas fa-birthday-cake"></i></div><div class="perk-name">Birthday Surprise</div><div class="perk-desc">Complimentary dessert &amp; champagne on your birthday</div></div>
+        <div class="perk-card"><div class="perk-icon"><i class="fas fa-medal"></i></div><div class="perk-name">Priority Booking</div><div class="perk-desc">First access to reservations &amp; special events</div></div>
+        <div class="perk-card"><div class="perk-icon"><i class="fas fa-wine-bottle"></i></div><div class="perk-name">cocktail Bar Access</div><div class="perk-desc">Exclusive tastings in our private cocktail bar</div></div>
+        <div class="perk-card"><div class="perk-icon"><i class="fas fa-utensils"></i></div><div class="perk-name">Chef's Table</div><div class="perk-desc">Complimentary upgrade at 5,000 points</div></div>
+        <div class="perk-card"><div class="perk-icon"><i class="fas fa-car"></i></div><div class="perk-name">Valet Parking</div><div class="perk-desc">Complimentary valet for all Gold+ members</div></div>
+        <div class="perk-card"><div class="perk-icon"><i class="fas fa-gift"></i></div><div class="perk-name">Monthly Gift</div><div class="perk-desc">Curated artisan products delivered monthly</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Offers & Promotions -->
+<section id="offers" class="client-only hidden">
+  <div class="fade-in">
+    <p class="section-eyebrow">Exclusive Deals</p>
+    <h2 class="section-title">Offers &amp; <em>Promotions</em></h2>
+  </div>
+  <div class="offers-grid" id="offersGrid"></div>
+</section>
+
+<!-- Chef Section -->
+<section id="chef">
+  <div class="chef-layout">
+    <div class="fade-in">
+      <div class="chef-portrait">
+        <div class="chef-portrait-bg"></div>
+        <span style="font-size:8rem;z-index:1"><img style="width:100%;" src="https://i.pinimg.com/1200x/4c/cb/5a/4ccb5a939e96b7ea358f3c6fbddee72a.jpg" ></span>
+      </div>
+    </div>
+    <div class="fade-in">
+      <p class="section-eyebrow">The Master Chef</p>
+      <h2 class="section-title">Chef <em>Karim Bennani</em></h2>
+      <div class="divider"></div>
+      <p class="section-sub" style="max-width:100%;margin-bottom:1.5rem">With over 20 years of culinary expertise across Paris, Lyon, and Tunis, Chef Karim Bennani merges French elegance with Mediterranean flavors. His passion for excellence has made NOIR a destination for discerning diners.</p>
+      <p class="section-sub" style="max-width:100%;font-style:italic;color:var(--text-dim)">"Cuisine is the art of bringing people together through taste, tradition, and innovation."</p>
+      <span class="chef-signature">— Karim Bennani</span>
+      <div class="awards">
+        <div class="award"><div class="award-icon"><i class="fas fa-star"></i></div><div><div class="award-name">Michelin Star 2019</div><div class="award-text">Awarded for exceptional cuisine</div></div></div>
+        <div class="award"><div class="award-icon"><i class="fas fa-award"></i></div><div><div class="award-name">Best Chef, Tunisia 2022</div><div class="award-text">International culinary excellence award</div></div></div>
+        <div class="award"><div class="award-icon"><i class="fas fa-book"></i></div><div><div class="award-name">Published Author</div><div class="award-text">"Saveurs Méditerranéennes" — cookbook</div></div></div>
+        <div class="award"><div class="award-icon"><i class="fas fa-globe"></i></div><div><div class="award-name">World's 50 Best</div><div class="award-text">Listed 2021, 2023, 2024</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section id="about">
+  <div class="fade-in">
+    <p class="section-eyebrow">About NOIR</p>
+    <h2 class="section-title">Our <em>Story</em></h2>
+    <p class="section-sub" id="aboutStory">Since 2015, NOIR has served refined dining experiences in Tunis for more than 12 years, combining French precision, Mediterranean ingredients, and hospitality-first service.</p>
+  </div>
+  <div class="about-milestones fade-in">
+    <div class="about-mile"><strong>2015</strong><span>NOIR opened its first dining room in Tunis.</span></div>
+    <div class="about-mile"><strong>2019</strong><span>Recognized with Michelin-level standards in execution and service.</span></div>
+    <div class="about-mile"><strong>2022</strong><span>Expanded private dining and chef's table experiences.</span></div>
+    <div class="about-mile"><strong>2026</strong><span>12+ years of continuous culinary excellence and innovation.</span></div>
+  </div>
+  <div class="awards fade-in" style="margin-top:1.5rem">
+    <div class="award"><div class="award-icon"><i class="fas fa-seedling"></i></div><div><div class="award-name">Quality Ingredients</div><div class="award-text">Seasonal sourcing with traceability.</div></div></div>
+    <div class="award"><div class="award-icon"><i class="fas fa-heart"></i></div><div><div class="award-name">Hospitality First</div><div class="award-text">Warm and attentive service for every guest.</div></div></div>
+    <div class="award"><div class="award-icon"><i class="fas fa-utensils"></i></div><div><div class="award-name">Craftsmanship</div><div class="award-text">Precision in every plate and detail.</div></div></div>
+  </div>
+</section>
+
+<!-- Reviews -->
+<section id="reviews" style="background:var(--darker)">
+  <div class="fade-in">
+    <p class="section-eyebrow">Guest Voices</p>
+    <h2 class="section-title">What Our <em>Guests</em> Say</h2>
+  </div>
+  <div class="reviews-grid" id="reviewsGrid"></div>
+  <div class="write-review fade-in">
+    <p class="section-eyebrow">Share Your Experience</p>
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;margin-bottom:0.25rem">Leave a <em>Review</em></h3>
+    <p style="font-size:12px;color:var(--text-muted)">Your feedback helps us grow and serve you better.</p>
+    <div class="star-rating" id="starRating">
+      <span class="star-btn active" onclick="setRating(1)">★</span>
+      <span class="star-btn active" onclick="setRating(2)">★</span>
+      <span class="star-btn active" onclick="setRating(3)">★</span>
+      <span class="star-btn active" onclick="setRating(4)">★</span>
+      <span class="star-btn" onclick="setRating(5)">★</span>
+    </div>
+    <div class="review-form-grid">
+      <div class="form-group"><label class="form-label" for="reviewDate">Visit Date</label><input class="form-input" type="date" id="reviewDate"></div>
+      <div class="form-group"><label class="form-label">Account</label><input class="form-input" value="Submit review while logged in" readonly></div>
+    </div>
+    <div class="form-group"><label class="form-label" for="reviewText">Your Review</label><textarea class="form-input" rows="3" placeholder="Describe your experience..." id="reviewText"></textarea></div>
+    <button class="submit-btn" onclick="submitReview()">Submit Review</button>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">NOIR</div>
+      <div class="footer-tagline">A sanctuary of taste. Where every meal is a memory crafted with care, passion, and the finest ingredients.</div>
+      <div class="footer-social">
+        <div class="social-btn"><i class="fab fa-facebook"></i></div>
+        <div class="social-btn"><i class="fab fa-instagram"></i></div>
+        <div class="social-btn"><i class="fab fa-twitter"></i></div>
+        <div class="social-btn"><i class="fab fa-youtube"></i></div>
+      </div>
+    </div>
+    <div>
+      <div class="footer-links-title">Navigate</div>
+      <div class="footer-links">
+        <a onclick="scrollSec('menu')">Menu</a>
+        <a onclick="scrollSec('reservation')">Reservation</a>
+        <a class="client-only hidden" onclick="scrollSec('loyalty')">Loyalty</a>
+        <a class="client-only hidden" onclick="scrollSec('offers')">Offers</a>
+        <a onclick="scrollSec('chef')">Our Chef</a>
+        <a onclick="scrollSec('about')">About us</a>z
+      </div>
+    </div>
+    <div>
+      <div class="footer-links-title">Experience</div>
+      <div class="footer-links">
+        <a>Private Dining</a><a>Chef's Table</a><a>cocktail Bar</a><a>Cooking Classes</a><a>Gift Cards</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-links-title">Contact</div>
+      <div class="footer-links">
+        <a>Avenue Bourguiba, Tunis 1000</a>
+        <a>+216 71 240 240</a>
+        <a>reservations@noir-tunis.tn</a>
+        <a>Lun–Dim 12:00–00:00</a>
+        <a>Fermé les jours fériés</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2024 NOIR Fine Dining. All rights reserved.</span>
+    <div style="display:flex;gap:2rem">
+      <a style="cursor:pointer;color:inherit">Privacy Policy</a>
+      <a style="cursor:pointer;color:inherit">Terms of Service</a>
+      <a style="cursor:pointer;color:inherit">Allergen Info</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Order Tracker Sidebar -->
+<div id="tracker-backdrop" onclick="toggleTrackerSidebar(false)"></div>
+<aside id="tracker-sidebar">
+  <div class="tracker-header">
+    <div class="tracker-title">Track Your Order</div>
+    <button class="tracker-close" onclick="toggleTrackerSidebar(false)">✕</button>
+  </div>
+  <div class="tracker-body">
+    <p class="section-sub" style="max-width:none">Enter your order number for real-time status updates.</p>
+    <div class="tracker-input" style="margin-top:1rem">
+      <div class="form-group">
+        <label class="form-label" for="trackInput">Order Number</label>
+        <input class="form-input" placeholder="e.g. NOIR-24-0847" id="trackInput">
+      </div>
+      <button class="submit-btn" onclick="trackOrder()">Track Order</button>
+    </div>
+    <div class="tracker-empty" id="trackerEmpty" style="margin-top:1rem">Enter your order number to load the live tracking timeline.</div>
+    <div id="trackerSteps" style="margin-top:1rem"></div>
+  </div>
+</aside>
+
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="searchOverlay" onclick="closeSearch(event)">
+  <div class="search-box" onclick="event.stopPropagation()">
+    <label for="searchInput"></label>
+    <input type="text" placeholder="Search dishes, ingredients…" id="searchInput" oninput="handleSearch(this.value)" onkeydown="if(event.key==='Escape')closeSearch()">
+    <div class="search-hint">Press ESC to close</div>
+    <div class="search-tags">
+      <div class="search-tag" onclick="searchFor('truffle')">Truffle</div>
+      <div class="search-tag" onclick="searchFor('vegetarian')">Vegetarian</div>
+      <div class="search-tag" onclick="searchFor('seafood')">Seafood</div>
+      <div class="search-tag" onclick="searchFor('chocolate')">Chocolate</div>
+      <div class="search-tag" onclick="searchFor('cocktail')">cocktail</div>
+    </div>
+    <div id="searchResults" style="margin-top:1.5rem;display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Live Chat -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" style="bottom:2rem;right:2rem"><i class="fas fa-comment"></i></button>
+<div class="chat-bubble" id="chatBubble">
+  <div class="chat-head">
+    <div class="chat-avatar"><i class="fas fa-chef-hat"></i></div>
+    <div class="chat-head-info"><div class="chat-head-name">NOIR Chatbot</div><div class="chat-head-status">● Online now</div></div>
+    <button onclick="toggleChat()" style="background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-size:16px">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="chat-msg bot">Bonsoir! I'm your personal dining chatbot. How can I help you this evening? <i class="fas fa-glass-cheers"></i></div>
+  </div>
+  <div class="chat-input-area">
+    <label for="chatInput"></label>
+    <input class="chat-input" id="chatInput" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="chat-send" onclick="sendChat()"><i class="fas fa-arrow-up"></i></button>
+  </div>
+</div>
+
+<!-- Item Modal -->
+<div class="modal-overlay" id="itemModal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="document.getElementById('itemModal').classList.remove('open')">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- Client Auth Modal -->
+<div class="auth-overlay" id="authOverlay" onclick="closeAuthModal(event)">
+  <div class="auth-modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <div class="auth-tabs">
+      <button id="authLoginTab" class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+      <button id="authSignupTab" class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+    </div>
+    <form id="clientLoginForm" class="stack-form">
+      <div class="form-group"><label class="form-label" for="clientLoginEmail">Email</label><input class="form-input" id="clientLoginEmail" type="email" placeholder="you@email.com" required></div>
+      <div class="form-group"><label class="form-label" for="clientLoginPassword">Password</label><input class="form-input" id="clientLoginPassword" type="password" placeholder="••••••••" required></div>
+      <button class="submit-btn" type="submit">Login</button>
+    </form>
+    <form id="clientSignupForm" class="stack-form hidden">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label" for="clientFirstName">First Name</label><input class="form-input" id="clientFirstName" type="text" placeholder="Alex" required></div>
+        <div class="form-group"><label class="form-label" for="clientLastName">Last Name</label><input class="form-input" id="clientLastName" type="text" placeholder="Smith" required></div>
+      </div>
+      <div class="form-group"><label class="form-label" for="clientSignupEmail">Email</label><input class="form-input" id="clientSignupEmail" type="email" placeholder="you@email.com" required></div>
+      <div class="form-group"><label class="form-label" for="clientSignupPhone">Phone</label><input class="form-input" id="clientSignupPhone" type="tel" placeholder="+216 ..." required></div>
+      <div class="form-group"><label class="form-label" for="clientSignupBirthDate">Birth Date</label><input class="form-input" id="clientSignupBirthDate" type="date" required></div>
+      <div class="form-group"><label class="form-label" for="clientSignupPassword">Password</label><input class="form-input" id="clientSignupPassword" type="password" placeholder="Min 8 characters" required></div>
+      <button class="submit-btn" type="submit">Create Account</button>
+    </form>
+  </div>
+</div>
+
+<!--RESERVATION MODAL -->
+<div class="auth-overlay" id="reservationOverlay" onclick="closeReservationModal(event)">
+  <div class="auth-modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeReservationModal()">✕</button>
+    <div class="modal-header">
+      <div>
+        <h2>Reserve Your Table</h2>
+        <p>Secure your spot for an unforgettable evening</p>
+      </div>
+    </div>
+    <div class="auth-tabs">
+      <button id="ResTab" class="auth-tab active" onclick="switchResTab('reserve')">Reserve</button>
+      <button id="ResList" class="auth-tab" onclick="switchResTab('list')">My Reservations</button>
+    </div>
+    <form id="ReservationForm" class="stack-form">
+      <div class="modal-col" id="reservationFormCol">
+        <div id="reservationFormModal">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label" for="resFirstNameModal">First Name</label><input class="form-input" type="text" placeholder="Alexandre" id="resFirstNameModal"></div>
+            <div class="form-group"><label class="form-label" for="resLastNameModal">Last Name</label><input class="form-input" type="text" placeholder="Dupont" id="resLastNameModal"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label" for="resEmailModal">Email</label><input class="form-input" type="email" placeholder="a.dupont@mail.com" id="resEmailModal"></div>
+            <div class="form-group"><label class="form-label" for="resPhoneModal">Phone</label><input class="form-input" type="tel" placeholder="+216 ..." id="resPhoneModal"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label" for="resDateModal">Date</label><input class="form-input" type="date" id="resDateModal"></div>
+            <div class="form-group"><label class="form-label" for="resGuestsModal">Guests</label>
+              <select class="form-input" id="resGuestsModal">
+                <option value="1">1 Guest</option><option value="2">2 Guests</option><option value="3" selected>3 Guests</option>
+                <option value="4">4 Guests</option><option value="5">5 Guests</option><option value="6">6 Guests</option>
+                <option value="7">7 Guests</option><option value="8">8 Guests</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preferred Time</label>
+            <div class="time-grid">
+              <div class="time-slot" onclick="selectTimeModal(this)">18:00</div>
+              <div class="time-slot" onclick="selectTimeModal(this)">18:30</div>
+              <div class="time-slot selected" onclick="selectTimeModal(this)">19:00</div>
+              <div class="time-slot" onclick="selectTimeModal(this)">19:30</div>
+              <div class="time-slot" onclick="selectTimeModal(this)">20:00</div>
+              <div class="time-slot" onclick="selectTimeModal(this)">20:30</div>
+              <div class="time-slot unavailable">21:00</div>
+              <div class="time-slot" onclick="selectTimeModal(this)">21:30</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dining Experience</label>
+            <div class="experience-grid">
+              <div class="exp-option selected" onclick="selectExpModal(this)"><div class="exp-icon"><i class="fa-solid fa-scroll"></i></div><div class="exp-name">À la Carte</div><div class="exp-desc">Full menu freedom</div></div>
+              <div class="exp-option" onclick="selectExpModal(this)"><div class="exp-icon"><i class="fas fa-utensils"></i></div><div class="exp-name">Chef's Table</div><div class="exp-desc">7-course tasting menu</div></div>
+              <div class="exp-option" onclick="selectExpModal(this)"><div class="exp-icon"><i class="fas fa-glass-cheers"></i></div><div class="exp-name">cocktail Pairing</div><div class="exp-desc">Curated cocktail per course</div></div>
+              <div class="exp-option" onclick="selectExpModal(this)"><div class="exp-icon"><i class="fa-solid fa-cake-candles"></i></div><div class="exp-name">Private Dining</div><div class="exp-desc">Exclusive room hire</div></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Menu Selection <span style="color:var(--text-muted);font-size:10px">(Optional)</span></label>
+            <p class="res-menu-helper">Pre-select dishes you know you want.</p>
+            <div class="reservation-menu-grid" id="reservationMenuOptionsModal"></div>
+            <div class="reservation-menu-summary" id="reservationMenuSummaryModal">No dishes selected yet.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Allergy Information <span style="color:var(--text-muted);font-size:10px">(Optional)</span></label>
+            <label class="allergy-toggle">
+              <input id="mentionAllergiesModal" type="checkbox" onchange="toggleAllergySelectionModal()">
+              <span>I want to mention allergies</span>
+            </label>
+            <div class="allergy-wrap hidden" id="allergySelectorWrapModal">
+              <div class="allergy-grid">
+                <label class="allergy-option"><input type="checkbox" value="Gluten"><span>Gluten</span></label>
+                <label class="allergy-option"><input type="checkbox" value="Dairy"><span>Dairy</span></label>
+                <label class="allergy-option"><input type="checkbox" value="Eggs"><span>Eggs</span></label>
+                <label class="allergy-option"><input type="checkbox" value="Nuts"><span>Nuts</span></label>
+                <label class="allergy-option"><input type="checkbox" value="Shellfish"><span>Shellfish</span></label>
+                <label class="allergy-option"><input type="checkbox" value="Soy"><span>Soy</span></label>
+                <label class="allergy-option"><input type="checkbox" value="Sesame"><span>Sesame</span></label>
+                <label class="allergy-option"><input type="checkbox" value="Fish"><span>Fish</span></label>
+              </div>
+              <input class="form-input" id="allergyOtherModal" placeholder="Other allergy (optional)" style="margin-top:8px">
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label" for="resSpecialRequestsModal">Special Requests</label><textarea class="form-input" rows="2" placeholder="Celebrations, dietary requirements..." id="resSpecialRequestsModal"></textarea></div>
+          <button class="submit-btn" onclick="submitReservationModal()"><i class="fas fa-calendar-check"></i> Confirm Reservation</button>
+        </div>
+        <!-- Success flash -->
+        <div class="success-msg" id="resSuccessModal">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="fas fa-check-circle" style="color:var(--green)"></i></div>
+          <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;margin-bottom:0.5rem">Reservation Confirmed!</h3>
+          <p style="font-size:12px;color:var(--text-muted)">We look forward to welcoming you.</p>
+          <p style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gold);margin-top:1rem" id="resSuccessCodeModal">Booking Ref: —</p>
+        </div>
+      </div>
+    </form>
+
+    <!-- Right: Reservations list -->
+    <div class="modal-col hidden" id="reservationsListCol">
+      <div class="modal-col-label"><i class="fas fa-list"></i> Your Reservations</div>
+      <div id="modalReservationsList" style="display:flex;flex-direction:column;gap:12px">
+        <div style="color:var(--text-muted);font-size:12px">Loading your reservations…</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeReservationModal()" style="width:100%">Close</button>
+    </div>
+  </div>
+</div>
+
+<!--ORDER MODAL-->
+<div class="auth-overlay" id="orderOverlay" onclick="closeOrderModal(event)">
+  <div class="auth-modal wide" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeOrderModal()">✕</button>
+    <div class="modal-header">
+      <div>
+        <h2>Order From NOIR</h2>
+        <p>Choose your plates, enter delivery details, and place your order directly.</p>
+      </div>
+    </div>
+    <div class="auth-tabs">
+      <button id="OrderTab" class="auth-tab" onclick="switchOrderTab('order')">Order</button>
+      <button id="OrderList" class="auth-tab active" onclick="switchOrderTab('list')">My Orders</button>
+    </div>
+    <form id="OrderForm" class="stack-form">
+      <div class="modal-col" id="orderFormCol">
+        <div id="orderFormModal">
+          <div class="form-group"><label class="form-label" for="orderNameModal">Your Name</label><input class="form-input" id="orderNameModal" type="text" placeholder="Your full name"></div>
+          <div class="form-group"><label class="form-label" for="orderPlaceModal">Delivery Address</label><input class="form-input" id="orderPlaceModal" type="text" placeholder="Street, city"></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label" for="orderTimeModal">Delivery Time</label><input class="form-input" id="orderTimeModal" type="time" value="19:00"></div>
+            <div class="form-group"><label class="form-label" for="orderPhoneModal">Phone</label><input class="form-input" id="orderPhoneModal" type="tel" placeholder="+216 ..."></div>
+          </div>
+          <div class="form-group"><label class="form-label" for="orderNotesModal">Special Instructions</label><textarea class="form-input" id="orderNotesModal" rows="2" placeholder="Allergies, delivery notes..."></textarea></div>
+          <div>
+            <div class="section-eyebrow" style="margin-bottom:0.75rem">Select plates &amp; quantities</div>
+            <div id="orderItemsList" style="display:grid;gap:10px;"></div>
+          </div>
+          <button class="submit-btn" type="button" onclick="submitOrderModal()"><i class="fas fa-check-circle"></i> Place Order</button>
+        </div>
+      </div>
+    </form>
+    
+    <!-- Right: My orders -->
+      <div class="modal-col hidden" id="ordersListCol">
+        <div class="modal-col-label"><i class="fas fa-receipt"></i> My Orders</div>
+        <div id="modalOrdersList" style="display:flex;flex-direction:column;gap:12px">
+          <div style="color:var(--text-muted);font-size:12px">Loading your orders…</div>
+        </div>
+      </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeOrderModal()" style="width:100%">Close</button>
+    </div>
+  </div>
+</div>
+
+<!--ACCOUNT MODAL-->
+<div class="auth-overlay" id="accountOverlay" onclick="closeAccountModal(event)">
+  <div class="auth-modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeAccountModal()">✕</button>
+    <div class="modal-header">
+      <div>
+        <h2>My Account</h2>
+        <p>Update your personal information and password.</p>
+      </div>
+    </div>
+    <div class="auth-tabs">
+      <button id="ProfileTab" class="auth-tab active" onclick="switchAccountTab('profile')">Profile</button>
+      <button id="PasswordTab" class="auth-tab" onclick="switchAccountTab('password')">Password</button>
+    </div>
+    <form id="ProfileForm" class="stack-form">
+      <div class="form-group">
+        <label class="form-label">Profile Photo</label>
+        <div style="display:flex;gap:12px;align-items:center">
+          <img id="accountPhotoPreview" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%22150%22 height=%22150%22 fill=%23212121/%3E%3Ccircle cx=%2232%22 cy=%2220%22 r=%2212%22 fill=%23fff/%3E%3Cpath d=%22M16 54c0-12 16-16 16-16s16 4 16 16H16z%22 fill=%23fff/%3E%3C/svg%3E" alt="avatar">
+          <input id="accountPicture" type="file" accept="image/*">
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label" for="accountFirstName">First Name</label><input class="form-input" id="accountFirstName" type="text" required></div>
+      <div class="form-group"><label class="form-label" for="accountLastName">Last Name</label><input class="form-input" id="accountLastName" type="text" required></div>
+      <div class="form-group"><label class="form-label" for="accountEmail">Email</label><input class="form-input" id="accountEmail" type="email" required></div>
+      <div class="form-group"><label class="form-label" for="accountPhone">Phone</label><input class="form-input" id="accountPhone" type="tel" required></div>
+      <div class="form-group"><label class="form-label" for="accountBirthDate">Birth Date</label><input class="form-input" id="accountBirthDate" type="date" required></div>
+      <div class="form-group"><label class="form-label" for="accountIsPro">NOIR Pro</label><label style="display:flex;align-items:center;gap:8px"><input id="accountIsPro" type="checkbox"> Enable Pro features</label></div>
+      <button class="submit-btn" type="button" onclick="updateProfile()"><i class="fas fa-save"></i> Update Profile</button>
+    </form>
+    <form id="PasswordForm" class="stack-form hidden">
+      <div class="form-group"><label class="form-label" for="oldPassword">Current Password</label><input class="form-input" id="oldPassword" type="password" required></div>
+      <div class="form-group"><label class="form-label" for="newPassword">New Password</label><input class="form-input" id="newPassword" type="password" required minlength="8"></div>
+      <button class="submit-btn" type="button" onclick="changePassword()"><i class="fas fa-key"></i> Change Password</button>
+    </form>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeAccountModal()" style="width:100%">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js?v=2"></script>
+
+</body>
+</html>

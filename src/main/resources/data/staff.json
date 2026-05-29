@@ -1,0 +1,41 @@
+[{
+  "role" : "kitchen",
+  "salt" : null,
+  "passwordHash" : null,
+  "createdAt" : null,
+  "lastLoginAt" : null,
+  "firstName" : "",
+  "lastName" : "",
+  "email" : "",
+  "phone" : null,
+  "birthDate" : null,
+  "profilePicture" : null
+}, {
+  "id" : "staff_chef_001",
+  "username" : "",
+  "role" : "chef",
+  "salt" : null,
+  "passwordHash" : null,
+  "createdAt" : null,
+  "lastLoginAt" : null,
+  "firstName" : "",
+  "lastName" : "",
+  "email" : "",
+  "phone" : null,
+  "birthDate" : null,
+  "profilePicture" : null
+}, {
+  "id" : "staff_delivery_001",
+  "username" : "",
+  "role" : "delivery",
+  "salt" : null,
+  "passwordHash" : null,
+  "createdAt" : null,
+  "lastLoginAt" : null,
+  "firstName" : "",
+  "lastName" : "",
+  "email" : "",
+  "phone" : null,
+  "birthDate" : null,
+  "profilePicture" : null
+} ]

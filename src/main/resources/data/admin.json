@@ -1,0 +1,10 @@
+[ {
+  "username" : "admin",
+  "role" : "admin",
+  "firstName" : "",
+  "lastName" : "",
+  "email" : "",
+  "phone" : null,
+  "birthDate" : null,
+  "profilePicture" : null
+} ]

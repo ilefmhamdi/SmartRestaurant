@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOIR — Kitchen Console</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+<style>
+.k-status { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:50px; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; font-weight:500; }
+.s-waiting       { background:rgba(90,82,72,.4);    border:.5px solid var(--border);   color:var(--text-muted); }
+.s-confirmed     { background:rgba(201,168,76,.15); border:.5px solid var(--gold);     color:var(--gold); }
+.s-being_prepared{ background:rgba(52,152,219,.15); border:.5px solid #5aafe8;         color:#5aafe8; }
+.s-ready         { background:rgba(46,204,113,.15); border:.5px solid var(--green);    color:var(--green); }
+.s-out_for_delivery{ background:rgba(155,89,182,.15); border:.5px solid #c39bd3;       color:#c39bd3; }
+.s-delivered     { background:rgba(22,160,133,.15); border:.5px solid #1abc9c;         color:#1abc9c; }
+.allergy-chip    { display:inline-flex; gap:4px; align-items:center; padding:3px 9px; border-radius:4px; font-size:10px; background:rgba(192,57,43,.15); border:.5px solid rgba(192,57,43,.4); color:#ff9a90; }
+.role-chef       { background:rgba(201,168,76,.15); border:.5px solid var(--gold);     color:var(--gold); }
+.role-kitchen    { background:rgba(52,152,219,.12); border:.5px solid #5aafe8;         color:#5aafe8; }
+.role-badge      { display:inline-flex; padding:4px 10px; border-radius:50px; font-size:10px; letter-spacing:2px; text-transform:uppercase; }
+.plate-card      { background:var(--surface2); border:.5px solid var(--border); border-radius:var(--radius); padding:16px; }
+.plate-card:hover{ border-color:var(--border2); }
+.oi-row          { display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom:.5px solid var(--border); }
+.oi-row:last-child{ border-bottom:none; }
+.oi-img          { width:40px; height:40px; object-fit:cover; border-radius:6px; border:.5px solid var(--border); }
+.oi-fallback     { width:40px; height:40px; border:.5px solid var(--border); border-radius:6px; display:flex; align-items:center; justify-content:center; color:var(--gold); font-size:12px; }
+.tab-bar         { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+.tab-btn         { padding:8px 18px; border:.5px solid var(--border); border-radius:50px; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); background:transparent; cursor:pointer; transition:all .25s; }
+.tab-btn.active,.tab-btn:hover { border-color:var(--gold); color:var(--gold); background:rgba(201,168,76,.08); }
+</style>
+</head>
+<body class="admin-page">
+<div class="wrap">
+
+  <!-- Login Card -->
+  <div id="loginView" class="panel login-card">
+    <div class="title">Kitchen Access</div>
+    <div class="headline">NOIR Kitchen</div>
+    <p class="sub login-sub">Sign in with your kitchen or chef credentials to access the operations console.</p>
+    <form id="loginForm" class="stack">
+      <div class="field"><label>Username</label><input class="input" id="ku" autocomplete="username" placeholder="Your username"></div>
+      <div class="field"><label>Password</label><input class="input" id="kp" type="password" placeholder="Password" autocomplete="current-password"></div>
+      <button class="btn-primary" type="submit">Sign In to Kitchen</button>
+    </form>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashView" class="hidden">
+    <div class="admin-shell">
+      <aside class="panel sidebar">
+        <div class="sidebar-brand">
+          <div class="eyebrow">Kitchen Operations</div>
+          <div class="brand">NOIR<small>KITCHEN CONSOLE</small></div>
+          <p class="hero-sub">Manage orders, view allergy details, update prep status, and handle chef specials.</p>
+          <div style="margin-top:12px;display:flex;align-items:center;gap:10px;">
+            <span class="role-badge" id="roleBadge"></span>
+            <span id="staffName" style="font-size:13px;color:var(--text-muted)"></span>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <button class="nav-btn active" data-view="menu" type="button"><div><span>Culinary Reference</span><strong>Menu</strong></div></button>
+          <button class="nav-btn" data-view="orders" type="button"><div><span>Active Work</span><strong>Orders</strong></div></button>
+          <button class="nav-btn" data-view="reservations" type="button"><div><span>Today & Upcoming</span><strong>Reservations</strong></div></button>
+          <button class="nav-btn" data-view="specials" type="button"><div><span>Chef Specials</span><strong>Special Plates</strong></div></button>
+          <button class="nav-btn" data-view="account" type="button"><div><span>My Profile</span><strong>Account</strong></div></button>
+        </nav>
+        <div class="sidebar-actions">
+          <button class="btn-primary" type="button" id="refreshBtn">Refresh</button>
+          <button class="btn-danger" type="button" id="logoutBtn">Logout</button>
+        </div>
+      </aside>
+
+      <main class="content-stack">
+        <section class="topbar">
+          <div class="topbar-copy">
+            <div class="eyebrow">Staff Portal</div>
+            <div class="brand">NOIR<small>KITCHEN DASHBOARD</small></div>
+            <p class="hero-sub">View and manage active orders, check allergy details, and handle special plates.</p>
+          </div>
+        </section>
+
+        <!-- Menu -->
+        <section id="view-menu" class="view active">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Culinary Reference</div>
+              <div class="headline">Menu</div>
+              <p class="sub">Browse all available menu items. Chefs can recommend dishes to customers.</p>
+            </div>
+          </div>
+          <div class="tab-bar">
+            <button class="tab-btn active" data-filter="all">All</button>
+            <button class="tab-btn" data-filter="starters">Starters</button>
+            <button class="tab-btn" data-filter="mains">Mains</button>
+            <button class="tab-btn" data-filter="desserts">Desserts</button>
+            <button class="tab-btn" data-filter="drinks">Drinks</button>
+            <button class="tab-btn" data-filter="veg">Vegetarian</button>
+          </div>
+          <div id="kitchenMenuGrid" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 20px;"></div>
+        </section>
+
+                <!-- Orders -->
+        <section id="view-orders" class="view">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Order Queue</div>
+              <div class="headline">Active Orders</div>
+              <p class="sub">Confirmed, being prepared, and ready orders. Click a row to inspect and update status.</p>
+            </div>
+          </div>
+          <div class="tab-bar">
+            <button class="tab-btn active" data-filter="all">All</button>
+            <button class="tab-btn" data-filter="confirmed">Confirmed</button>
+            <button class="tab-btn" data-filter="being_prepared">Being Prepared</button>
+            <button class="tab-btn" data-filter="ready">Ready</button>
+          </div>
+          <div class="grid">
+            <section class="panel card span-7">
+              <div class="section-head">
+                <div><div class="title">Queue</div><div class="headline">Kitchen Orders</div></div>
+                <span id="orderCount" style="font-size:11px;color:var(--text-muted);letter-spacing:1px;"></span>
+              </div>
+              <div class="table-wrap">
+                <table><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="ordersTable"></tbody></table>
+              </div>
+            </section>
+            <section class="panel card span-5">
+              <div class="section-head"><div><div class="title">Inspection</div><div class="headline" id="detailTitle">Select an Order</div></div></div>
+              <div id="orderDetail" class="empty">Click an order row to see full details, allergy notes, and update status.</div>
+            </section>
+          </div>
+        </section>
+
+        <!-- Reservations -->
+        <section id="view-reservations" class="view">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Today & Upcoming</div>
+              <div class="headline">Reservations</div>
+              <p class="sub">Full allergy and dietary information for preparing your kitchen for incoming guests.</p>
+            </div>
+          </div>
+          <section class="panel card">
+            <div class="section-head">
+              <div><div class="title">Guest List</div><div class="headline">Allergy Details</div></div>
+              <span id="resCount" style="font-size:11px;color:var(--text-muted);"></span>
+            </div>
+            <div id="resList" class="stack"></div>
+          </section>
+        </section>
+
+        <!-- Special Plates -->
+        <section id="view-specials" class="view">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Chef Specials</div>
+              <div class="headline">Special Plates</div>
+              <p class="sub">Temporary or recurring specials. Chefs can add, edit, recommend dishes, and badge existing menu items.</p>
+            </div>
+            <div class="actions" id="chefBtns" style="display:none">
+              <button class="btn-primary btn-small" type="button" onclick="openPlateForm()">+ Add Special Plate</button>
+            </div>
+          </div>
+          <div class="grid">
+            <section class="panel card span-7">
+              <div class="section-head"><div><div class="title">Active Specials</div><div class="headline">Chef Plates</div></div></div>
+              <div id="platesList" class="stack"></div>
+            </section>
+            <div id="chefRightCol" style="display:contents">
+              <section class="panel card span-5" id="plateFormPanel" style="display:none">
+                <div class="section-head"><div><div class="title">Chef Tools</div><div class="headline" id="plateFormTitle">Add Special Plate</div></div></div>
+                <form id="plateForm" class="stack">
+                  <div class="field"><label>Name</label><input class="input" id="pName" placeholder="Dish name" required></div>
+                  <div class="form-grid">
+                    <div class="field"><label>Category</label>
+                      <select class="select" id="pCat"><option value="starters">Starters</option><option value="mains" selected>Mains</option><option value="desserts">Desserts</option><option value="drinks">Drinks</option></select>
+                    </div>
+                    <div class="field"><label>Price (TND)</label><input class="input" id="pPrice" type="number" step="0.5" min="0" required></div>
+                  </div>
+                  <div class="field"><label>Description</label><textarea class="textarea" id="pDesc" placeholder="Describe the dish..." rows="3"></textarea></div>
+                  <div class="field"><label>Image URL</label><input class="input" id="pImage" placeholder="https://..."></div>
+                  <div class="field"><label>Allergens (comma separated)</label><input class="input" id="pAllergens" placeholder="Gluten, Dairy, Nuts"></div>
+                  <div class="form-grid">
+                    <div class="field"><label>Available From</label><input class="input" id="pFrom" type="date"></div>
+                    <div class="field"><label>Available To</label><input class="input" id="pTo" type="date"></div>
+                  </div>
+                  <div class="field"><label>Days (comma separated, empty = all)</label><input class="input" id="pDays" placeholder="Monday, Sunday"></div>
+                  <div class="field" style="flex-direction:row;align-items:center;gap:10px;">
+                    <input type="checkbox" id="pRec" style="accent-color:var(--gold);width:16px;height:16px;">
+                    <label for="pRec" style="font-size:12px;color:var(--text-muted);text-transform:none;letter-spacing:0">Mark as Chef's Recommendation</label>
+                  </div>
+                  <div class="actions">
+                    <button class="btn-primary" type="submit">Save Plate</button>
+                    <button class="btn-ghost" type="button" id="pCancel">Cancel</button>
+                  </div>
+                </form>
+              </section>
+              <section class="panel card span-5" id="recommendPanel" style="display:none">
+                <div class="section-head"><div><div class="title">Chef Picks</div><div class="headline">Recommend a Dish</div></div></div>
+                <p class="sub" style="margin-bottom:14px">Badge an existing menu item as your recommendation of the day.</p>
+                <div class="form-grid">
+                  <div class="field"><label>Menu Item ID</label><input class="input" id="recId" type="number" placeholder="e.g. 5"></div>
+                  <div style="display:flex;align-items:flex-end;padding-bottom:2px;">
+                    <button class="btn-ghost btn-small" type="button" id="recBtn">Recommend</button>
+                  </div>
+                </div>
+                <div id="recResult" style="margin-top:12px;"></div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-account" class="view">
+          <header class="view-header">
+            <div>
+              <div class="eyebrow">Profile Management</div>
+              <div class="headline">My Account</div>
+              <p class="hero-sub">Update your username and change password.</p>
+            </div>
+          </header>
+          <div class="view-content">
+            <div class="panel">
+              <div class="tabs">
+                <button class="tab active" onclick="switchKitchenTab('profile')">Profile</button>
+                <button class="tab" onclick="switchKitchenTab('password')">Password</button>
+              </div>
+              <form id="kitchenProfileForm" class="stack">
+                <div class="field">
+                  <label>Username</label>
+                  <input class="input" id="kitchenUsername" type="text" required>
+                </div>
+                <div class="field">
+                  <label>Role</label>
+                  <input class="input" id="kitchenRole" readonly>
+                </div>
+                <div class="field"><label>First Name</label><input class="input" id="kitchenFirstName" type="text"></div>
+                <div class="field"><label>Last Name</label><input class="input" id="kitchenLastName" type="text"></div>
+                <div class="field"><label>Email</label><input class="input" id="kitchenEmail" type="email"></div>
+                <div class="field"><label>Phone</label><input class="input" id="kitchenPhone" type="tel"></div>
+                <div class="field"><label>Birth Date</label><input class="input" id="kitchenBirthDate" type="date"></div>
+                <div class="field">
+                  <label>Profile Photo</label>
+                  <div style="display:flex;gap:12px;align-items:center">
+                    <img id="kitchenPhotoPreview" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 fill=%23212121/%3E%3Ccircle cx=%2232%22 cy=%2220%22 r=%2212%22 fill=%23fff/%3E%3Cpath d=%22M16 54c0-12 16-16 16-16s16 4 16 16H16z%22 fill=%23fff/%3E%3C/svg%3E" alt="avatar" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:0.5px solid var(--border)">
+                    <input id="kitchenPicture" type="file" accept="image/*">
+                  </div>
+                </div>
+                <button class="btn-primary" type="button" onclick="updateKitchenProfile()">Update Profile</button>
+              </form>
+              <form id="kitchenPasswordForm" class="stack hidden">
+                <div class="field">
+                  <label>Current Password</label>
+                  <input class="input" id="kitchenOldPassword" type="password" required>
+                </div>
+                <div class="field">
+                  <label>New Password</label>
+                  <input class="input" id="kitchenNewPassword" type="password" required minlength="8">
+                </div>
+                <button class="btn-primary" type="button" onclick="changeKitchenPassword()">Change Password</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+const API = '/api/kitchen';
+const TK  = 'noir-kitchen-token';
+const st  = { token: localStorage.getItem(TK) || '', staff: null, orders: [], menu: [], filter: 'all', editId: null };
+
+const esc = v => String(v??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function toast(msg, type='success') {
+  const el = Object.assign(document.createElement('div'), { className: `toast ${type}`, innerHTML: `<i class="toast-icon fas ${type==='success'?'fa-check-circle':'fa-exclamation-circle'}"></i> ${esc(msg)}` });
+  document.getElementById('toastStack').appendChild(el);
+  setTimeout(() => el.classList.add('show'), 10);
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 250); }, 3200);
+}
+
+async function api(path, opts={}) {
+  const cfg = { ...opts, headers: { ...(opts.headers||{}) } };
+  if (st.token) cfg.headers.Authorization = `Bearer ${st.token}`;
+  if (cfg.body && !cfg.headers['Content-Type']) cfg.headers['Content-Type'] = 'application/json';
+  const res = await fetch(`${API}${path}`, cfg);
+  const json = await res.json().catch(()=>({}));
+  if (!res.ok) throw new Error(json.message || 'Request failed');
+  return json.data;
+}
+
+// Load menu automatically on page load
+async function loadPublicMenu() {
+  try {
+    const menu = await fetch('/api/menu').then(r => r.json()).then(d => d.data || []);
+    st.menu = menu;
+    renderMenu();
+  } catch(err) {
+    console.log('Menu load failed:', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadPublicMenu);
+
+const statusLabel = { waiting:'Waiting', confirmed:'Confirmed', being_prepared:'Being Prepared', ready:'Ready', out_for_delivery:'Out for Delivery', delivered:'Delivered' };
+const badge = s => `<span class="k-status s-${esc(s)}">${esc(statusLabel[s]||s)}</span>`;
+const isChef = () => st.staff?.role === 'chef';
+
+// Login
+document.getElementById('loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  try {
+    const d = await api('/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: document.getElementById('ku').value, password: document.getElementById('kp').value }) });
+    st.token = d.token; st.staff = d.user;
+    localStorage.setItem(TK, st.token);
+    boot();
+  } catch(err) { toast(err.message,'error'); }
+});
+
+function boot() {
+  document.getElementById('loginView').classList.add('hidden');
+  document.getElementById('dashView').classList.remove('hidden');
+  document.getElementById('roleBadge').textContent = st.staff.role;
+  document.getElementById('roleBadge').className = `role-badge role-${st.staff.role}`;
+  document.getElementById('staffName').textContent = st.staff.username;
+  if (isChef()) {
+    document.getElementById('chefBtns').style.display = 'flex';
+    document.getElementById('plateFormPanel').style.display = 'block';
+    document.getElementById('recommendPanel').style.display = 'block';
+  }
+  loadAll();
+}
+
+// Nav
+document.querySelectorAll('.nav-btn[data-view]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById(`view-${b.dataset.view}`).classList.add('active');
+  if (b.dataset.view === 'menu') renderMenu();
+}));
+document.querySelectorAll('.tab-btn[data-filter]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+  b.classList.add('active'); 
+  st.filter = b.dataset.filter; 
+  const activeView = document.querySelector('.view.active').id;
+  if (activeView === 'view-menu') renderMenu();
+  else if (activeView === 'view-orders') renderOrders();
+}));
+document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.removeItem(TK); location.reload(); });
+document.getElementById('refreshBtn').addEventListener('click', loadAll);
+
+// Load
+async function loadAll() {
+  try {
+    const [orders, res, plates, menu] = await Promise.all([api('/orders'), api('/reservations'), api('/special-plates'), api('/menu')]);
+    st.orders = orders;
+    st.menu = menu || [];
+    renderOrders(); renderRes(res); renderPlates(plates);
+  } catch(err) { toast(err.message,'error'); }
+}
+
+// Orders
+function renderOrders() {
+  const list = st.filter==='all' ? st.orders : st.orders.filter(o=>o.status===st.filter);
+  document.getElementById('orderCount').textContent = `${list.length} order${list.length!==1?'s':''}`;
+  const tb = document.getElementById('ordersTable');
+  if (!list.length) { tb.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">No orders in this category.</td></tr>`; return; }
+  tb.innerHTML = list.map(o=>`
+    <tr style="cursor:pointer" onclick="showDetail('${esc(o.orderNumber)}')">
+      <td><strong>${esc(o.orderNumber)}</strong></td>
+      <td>${esc(o.customerName)}</td>
+      <td>${(o.items||[]).length}</td>
+      <td>${o.total} TND</td>
+      <td>${badge(o.status)}</td>
+      <td>${
+        o.status==='confirmed' ? `<button class="btn-ghost btn-small" onclick="event.stopPropagation();setStatus('${esc(o.orderNumber)}','being_prepared')">Start Prep</button>` :
+        o.status==='being_prepared' ? `<button class="btn-primary btn-small" onclick="event.stopPropagation();setStatusNotes('${esc(o.orderNumber)}','ready')">Mark Ready</button>` :
+        `<span class="muted" style="font-size:11px">—</span>`
+      }</td>
+    </tr>`).join('');
+}
+
+function showDetail(num) {
+  const o = st.orders.find(x=>x.orderNumber===num); if (!o) return;
+  document.getElementById('detailTitle').textContent = o.orderNumber;
+  const hasNote = o.notes||o.kitchenNotes;
+  const itemsHtml = (o.items||[]).map(i=>`
+    <div class="oi-row">
+      ${i.image?`<img src="${esc(i.image)}" class="oi-img">`:`<div class="oi-fallback"><i class="fas fa-utensils"></i></div>`}
+      <div style="flex:1"><div style="font-size:13px">${esc(i.name)}</div><div class="muted" style="font-size:11px">×${i.quantity} · ${i.price} TND</div></div>
+      <div style="color:var(--gold)">${(i.price*i.quantity).toFixed(2)} TND</div>
+    </div>`).join('');
+  const nextStatus = o.status==='confirmed'?'being_prepared':o.status==='being_prepared'?'ready':null;
+  document.getElementById('orderDetail').innerHTML = `
+    <div style="background:var(--surface2);border:.5px solid var(--border2);border-radius:var(--radius-lg);padding:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">${badge(o.status)}<span class="muted" style="font-size:11px">${new Date(o.createdAt).toLocaleString()}</span></div>
+      <div class="muted" style="font-size:12px;margin-bottom:3px"><i class="fas fa-user"></i> ${esc(o.customerName)}</div>
+      <div class="muted" style="font-size:12px;margin-bottom:3px"><i class="fas fa-location-dot"></i> ${esc(o.deliveryAddress)}</div>
+      <div class="muted" style="font-size:12px;margin-bottom:3px"><i class="fas fa-clock"></i> ${esc(o.deliveryTime)} · ETA ${esc(o.eta)}</div>
+      <div class="muted" style="font-size:12px;margin-bottom:10px"><i class="fas fa-phone"></i> ${esc(o.contactPhone)}</div>
+      ${hasNote?`<div style="padding:10px;background:rgba(192,57,43,.08);border:.5px solid rgba(192,57,43,.3);border-radius:var(--radius);font-size:12px;margin-bottom:10px"><strong style="color:#ff9a90"><i class="fas fa-triangle-exclamation"></i> Notes</strong><br>${esc(o.notes||'')}${o.kitchenNotes?`<br><em>${esc(o.kitchenNotes)}</em>`:''}</div>`:''}
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Items</div>
+      ${itemsHtml}
+      <div style="display:flex;justify-content:space-between;padding-top:10px;border-top:.5px solid var(--border);margin-top:8px"><span class="muted">Total</span><strong style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.2rem">${o.total} TND</strong></div>
+      ${nextStatus?`<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-primary" onclick="setStatusNotes('${esc(o.orderNumber)}','${nextStatus}')"><i class="fas ${nextStatus==='being_prepared'?'fa-fire':'fa-check'}"></i> ${nextStatus==='being_prepared'?'Start Preparation':'Mark as Ready'}</button>
+      </div>`:`<div class="muted" style="margin-top:12px;font-size:11px">No further kitchen action needed.</div>`}
+    </div>`;
+}
+
+// Menu
+function renderMenu() {
+  const grid = document.getElementById('kitchenMenuGrid');
+  if (!grid || !st.menu) return;
+  
+  const items = st.filter === 'all'
+    ? st.menu
+    : st.filter === 'veg'
+      ? st.menu.filter(m => m.veg)
+      : st.menu.filter(m => m.cat === st.filter);
+
+  if (!items.length) {
+    grid.innerHTML = '<div style="grid-column: 1/-1; padding: 24px; text-align: center; color: var(--text-muted);">No menu items in this category.</div>';
+    return;
+  }
+
+  grid.innerHTML = items.map(item => `
+    <div class="plate-card">
+      <div style="margin-bottom: 10px;">
+        ${item.image 
+          ? `<img src="${esc(item.image)}" alt="${esc(item.name)}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 6px; border: 0.5px solid var(--border);">` 
+          : `<div style="width: 100%; height: 200px; background: var(--surface); border-radius: 6px; border: 0.5px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 14px;">${esc(item.name.charAt(0))}</div>`}
+      </div>
+      <div style="margin-bottom: 8px;">
+        <strong style="font-family: 'Cormorant Garamond', serif; font-size: 1rem;">${esc(item.name)}</strong>
+        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;">${esc(item.cat)} · ${item.price} TND</div>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 10px 0; line-height: 1.5;">${esc(item.desc || 'No description')}</p>
+      ${item.allergens && item.allergens.length ? `<div style="font-size: 10px; color: rgba(192,57,43,0.8); margin-bottom: 10px;"><strong>Allergens:</strong> ${esc((item.allergens || []).join(', '))}</div>` : ''}
+      ${item.rating ? `<div style="font-size: 11px; color: var(--gold); margin-bottom: 10px;"><i class="fas fa-star"></i> ${item.rating}/5 (${item.reviews} reviews)</div>` : ''}
+      ${isChef() ? `<button class="btn-ghost btn-small" type="button" onclick="recommendFromMenu(${item.id}, '${esc(item.name)}')" style="width: 100%; background: rgba(201,168,76,.2); color: var(--gold); border: 0.5px solid var(--gold);"><i class="fas fa-heart"></i> Recommend</button>` : ''}
+    </div>
+  `).join('');
+}
+
+function recommendFromMenu(dishId, dishName) {
+  document.getElementById('recId').value = dishId;
+  document.getElementById('recommendPanel').style.display = 'block';
+  toast(`Ready to recommend: ${dishName}`, 'gold');
+}
+
+async function setStatus(num, s) {
+  try { await api(`/orders/${encodeURIComponent(num)}/status`,{method:'PATCH',body:JSON.stringify({status:s})}); toast(`${num} → ${s.replace('_',' ')}`); await loadAll(); showDetail(num); }
+  catch(err) { toast(err.message,'error'); }
+}
+function setStatusNotes(num, s) {
+  const notes = prompt('Kitchen notes (optional):');
+  api(`/orders/${encodeURIComponent(num)}/status`,{method:'PATCH',body:JSON.stringify({status:s,kitchenNotes:notes||undefined})})
+    .then(()=>{ toast(`${num} → ${s.replace('_',' ')}`); loadAll().then(()=>showDetail(num)); })
+    .catch(err=>toast(err.message,'error'));
+}
+
+// Reservations
+function renderRes(list) {
+  document.getElementById('resCount').textContent = `${list.length} upcoming`;
+  const el = document.getElementById('resList');
+  if (!list.length) { el.innerHTML=`<div class="empty">No upcoming reservations.</div>`; return; }
+  el.innerHTML = list.map(r=>`
+    <div class="detail-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+        <div>
+          <strong>${esc(r.firstName)} ${esc(r.lastName)}</strong>
+          <div class="muted" style="font-size:12px;margin-top:2px"><i class="fas fa-calendar"></i> ${esc(r.date)} at ${esc(r.time)} · <i class="fas fa-users"></i> ${r.guests} guests</div>
+          <div class="muted" style="font-size:12px;margin-top:2px"><i class="fas fa-star"></i> ${esc(r.experience)} · ${esc(r.confirmationCode)}</div>
+        </div>
+        ${badge(r.status)}
+      </div>
+      <div style="margin-top:10px;padding:10px;background:rgba(192,57,43,.06);border:.5px solid rgba(192,57,43,.2);border-radius:var(--radius)">
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#ff9a90;margin-bottom:6px"><i class="fas fa-triangle-exclamation"></i> Allergy Information</div>
+        ${(r.allergySelections||[]).length
+          ? r.allergySelections.map(a=>`<span class="allergy-chip"><i class="fas fa-triangle-exclamation"></i> ${esc(a)}</span>`).join(' ')
+          : `<span class="muted" style="font-size:11px;font-style:italic">No allergies reported</span>`}
+      </div>
+      ${r.specialRequests?`<div style="margin-top:8px;font-size:12px;color:var(--text-muted)"><i class="fas fa-comment"></i> ${esc(r.specialRequests)}</div>`:''}
+      ${(r.menuSelections||[]).length?`<div style="font-size:11px;color:var(--text-muted);margin-top:6px">Pre-selected: ${esc(r.menuSelections.join(', '))}</div>`:''}
+    </div>`).join('');
+}
+
+// Special Plates
+function renderPlates(plates) {
+  const el = document.getElementById('platesList');
+  if (!plates.length) { el.innerHTML=`<div class="empty">No special plates yet.${isChef()?' Use the form to add one.':''}</div>`; return; }
+  el.innerHTML = plates.map(p=>`
+    <div class="plate-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <strong style="font-family:'Cormorant Garamond',serif;font-size:1.1rem">${esc(p.name)}</strong>
+            ${p.recommended?`<span class="k-status s-confirmed"><i class="fas fa-star"></i> Chef Pick</span>`:''}
+          </div>
+          <div class="muted" style="font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-top:2px">${esc(p.cat)}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:6px;line-height:1.6">${esc(p.desc)}</div>
+          ${(p.allergens||[]).length?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${p.allergens.map(a=>`<span class="allergy-chip">${esc(a)}</span>`).join('')}</div>`:''}
+          ${p.availableFrom&&p.availableTo?`<div style="font-size:10px;color:var(--text-muted);margin-top:4px"><i class="fas fa-clock"></i> ${esc(p.availableFrom)} → ${esc(p.availableTo)}</div>`:''}
+          ${(p.availableDays||[]).length?`<div style="font-size:10px;color:var(--text-muted);margin-top:2px"><i class="fas fa-calendar-days"></i> Every ${esc(p.availableDays.join(', '))}</div>`:''}
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">By ${esc(p.recommendedBy||'kitchen')}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--gold)">${p.price} TND</div>
+          ${isChef()?`<div class="actions" style="margin-top:8px;justify-content:flex-end">
+            <button class="btn-ghost btn-small" onclick="editPlate('${esc(p.id)}')">Edit</button>
+            <button class="btn-danger btn-small" onclick="delPlate('${esc(p.id)}')">Remove</button>
+          </div>`:''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openPlateForm(p=null) {
+  st.editId = p?.id||null;
+  document.getElementById('plateFormTitle').textContent = p?'Edit Special Plate':'Add Special Plate';
+  document.getElementById('pName').value = p?.name||'';
+  document.getElementById('pCat').value  = p?.cat||'mains';
+  document.getElementById('pPrice').value= p?.price||'';
+  document.getElementById('pDesc').value = p?.desc||'';
+  document.getElementById('pImage').value= p?.image||'';
+  document.getElementById('pAllergens').value = (p?.allergens||[]).join(', ');
+  document.getElementById('pFrom').value = p?.availableFrom||'';
+  document.getElementById('pTo').value   = p?.availableTo||'';
+  document.getElementById('pDays').value = (p?.availableDays||[]).join(', ');
+  document.getElementById('pRec').checked= p?.recommended||false;
+  document.getElementById('plateFormPanel').style.display='block';
+  document.getElementById('plateFormPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function editPlate(id) { api('/special-plates').then(ps=>{const p=ps.find(x=>x.id===id);if(p)openPlateForm(p);}); }
+document.getElementById('pCancel').addEventListener('click',()=>{ st.editId=null; document.getElementById('plateForm').reset(); document.getElementById('plateFormTitle').textContent='Add Special Plate'; });
+document.getElementById('plateForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const days = document.getElementById('pDays').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const body = {
+    name:document.getElementById('pName').value, cat:document.getElementById('pCat').value,
+    price:parseFloat(document.getElementById('pPrice').value), desc:document.getElementById('pDesc').value,
+    image:document.getElementById('pImage').value,
+    allergens:document.getElementById('pAllergens').value.split(',').map(s=>s.trim()).filter(Boolean),
+    availableFrom:document.getElementById('pFrom').value||null, availableTo:document.getElementById('pTo').value||null,
+    availableDays:days.length?days:null, recommended:document.getElementById('pRec').checked,
+  };
+  try {
+    if (st.editId) { await api(`/special-plates/${st.editId}`,{method:'PUT',body:JSON.stringify(body)}); toast('Plate updated'); }
+    else { await api('/special-plates',{method:'POST',body:JSON.stringify(body)}); toast('Plate added'); }
+    st.editId=null; document.getElementById('plateForm').reset(); document.getElementById('plateFormTitle').textContent='Add Special Plate';
+    renderPlates(await api('/special-plates'));
+  } catch(err) { toast(err.message,'error'); }
+});
+async function delPlate(id) {
+  if (!confirm('Remove this special plate?')) return;
+  try { await api(`/special-plates/${id}`,{method:'DELETE'}); toast('Plate removed'); renderPlates(await api('/special-plates')); }
+  catch(err) { toast(err.message,'error'); }
+}
+
+// Recommend
+document.getElementById('recBtn').addEventListener('click', async ()=>{
+  const id = document.getElementById('recId').value;
+  if (!id) return toast('Enter a menu item ID','error');
+  try {
+    const r = await api(`/recommend/${id}`,{method:'POST'});
+    document.getElementById('recResult').innerHTML=`<div class="detail-card"><span class="k-status s-confirmed" style="margin-bottom:8px"><i class="fas fa-star"></i> Recommended!</span><div><strong>${esc(r.menuItem.name)}</strong></div><div class="muted" style="font-size:11px">"recommended" badge added · By ${esc(r.recommendedBy)}</div></div>`;
+    toast(`"${r.menuItem.name}" marked as recommended!`);
+  } catch(err) { toast(err.message,'error'); }
+});
+
+// ─── ACCOUNT ────────────────────────────────────────────────────────────────
+
+function switchKitchenTab(mode) {
+  const isProfile = mode === 'profile';
+  document.querySelectorAll('#view-account .tab').forEach((tab, index) => {
+    tab.classList.toggle('active', index === (isProfile ? 0 : 1));
+  });
+  document.getElementById('kitchenProfileForm').classList.toggle('hidden', !isProfile);
+  document.getElementById('kitchenPasswordForm').classList.toggle('hidden', isProfile);
+  if (isProfile) loadKitchenProfile();
+}
+
+async function loadKitchenProfile() {
+  try {
+    const user = await api('/me');
+    document.getElementById('kitchenUsername').value = user.username || '';
+    document.getElementById('kitchenRole').value = user.role || '';
+    document.getElementById('kitchenFirstName').value = user.firstName || '';
+    document.getElementById('kitchenLastName').value = user.lastName || '';
+    document.getElementById('kitchenEmail').value = user.email || '';
+    document.getElementById('kitchenPhone').value = user.phone || '';
+    document.getElementById('kitchenBirthDate').value = user.birthDate || '';
+    const photo = document.getElementById('kitchenPhotoPreview');
+    if (user.profilePicture) photo.src = user.profilePicture;
+  } catch (err) {
+    toast('Failed to load profile', 'error');
+  }
+}
+
+async function updateKitchenProfile() {
+  const username = document.getElementById('kitchenUsername').value.trim();
+  const firstName = document.getElementById('kitchenFirstName').value.trim();
+  const lastName = document.getElementById('kitchenLastName').value.trim();
+  const email = document.getElementById('kitchenEmail').value.trim();
+  const phone = document.getElementById('kitchenPhone').value.trim();
+  const birthDate = document.getElementById('kitchenBirthDate').value;
+  const fileInput = document.getElementById('kitchenPicture');
+  if (!username) {
+    toast('Username is required', 'error');
+    return;
+  }
+  try {
+    let profilePicture = null;
+    if (fileInput && fileInput.files && fileInput.files[0]) {
+      profilePicture = await toDataURL(fileInput.files[0]);
+    }
+    await api('/me', {
+      method: 'PUT',
+      body: JSON.stringify({ username, firstName, lastName, email, phone, birthDate, profilePicture })
+    });
+    toast('Profile updated successfully');
+  } catch (err) {
+    toast(err.message, 'error');
+  }
+}
+
+async function changeKitchenPassword() {
+  const oldPassword = document.getElementById('kitchenOldPassword').value;
+  const newPassword = document.getElementById('kitchenNewPassword').value;
+  if (!oldPassword || !newPassword) {
+    toast('Both passwords are required', 'error');
+    return;
+  }
+  if (newPassword.length < 8) {
+    toast('New password must be at least 8 characters', 'error');
+    return;
+  }
+  try {
+    await api('/me/password', {
+      method: 'PUT',
+      body: JSON.stringify({ oldPassword, newPassword })
+    });
+    toast('Password changed successfully');
+    document.getElementById('kitchenOldPassword').value = '';
+    document.getElementById('kitchenNewPassword').value = '';
+  } catch (err) {
+    toast(err.message, 'error');
+  }
+}
+
+// Auto-login check
+if (st.token) {
+  api('/orders').then(()=>{
+    try { const p=JSON.parse(atob(st.token.split('.')[0])); st.staff={username:p.username,role:p.role}; boot(); }
+    catch{ localStorage.removeItem(TK); }
+  }).catch(()=>{ localStorage.removeItem(TK); st.token=''; });
+}
+</script>
+</body>
+</html>

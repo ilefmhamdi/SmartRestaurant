@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOIR Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-page">
+<div class="wrap">
+  <div id="loginView" class="panel login-card">
+    <div class="title">Protected Access</div>
+    <div class="headline">NOIR Admin</div>
+    <p class="sub login-sub">Admin access is protected. Client contact data stays masked in lists and is only revealed on explicit inspection.</p>
+    <form id="loginForm" class="stack">
+      <div class="field">
+        <label>Username</label>
+        <input class="input" id="username" value="admin" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input class="input" id="password" type="password" placeholder="Enter admin password" autocomplete="current-password">
+      </div>
+      <button class="btn-primary" type="submit">Sign In</button>
+    </form>
+  </div>
+
+  <div id="adminView" class="hidden">
+    <div class="admin-shell">
+      <aside class="panel sidebar">
+        <div class="sidebar-brand">
+          <div class="eyebrow">Private Operations Console</div>
+          <div class="brand">NOIR<small>ADMIN CONTROL ROOM</small></div>
+          <p class="hero-sub">Navigate by domain. Each dashboard is isolated so the workspace stays focused.</p>
+        </div>
+        <nav class="sidebar-nav">
+          <button class="nav-btn active" data-view-target="home" type="button"><div><span>Homepage</span><strong>Overview</strong></div></button>
+          <button class="nav-btn" data-view-target="menu" type="button"><div><span>Catalog</span><strong>Menu</strong></div></button>
+          <button class="nav-btn" data-view-target="reservations" type="button"><div><span>Bookings</span><strong>Reservations</strong></div></button>
+          <button class="nav-btn" data-view-target="orders" type="button"><div><span>Delivery</span><strong>Orders</strong></div></button>
+          <button class="nav-btn" data-view-target="inventory" type="button"><div><span>Kitchen Stock</span><strong>Ingredients</strong></div></button>
+          <button class="nav-btn" data-view-target="tables" type="button"><div><span>Dining Plan</span><strong>Tables</strong></div></button>
+          <button class="nav-btn" data-view-target="staff" type="button"><div><span>Team</span><strong>Staff</strong></div></button>
+          <button class="nav-btn" data-view-target="reviews" type="button"><div><span>Feedback</span><strong>Reviews</strong></div></button>
+          <button class="nav-btn" data-view-target="promotions" type="button"><div><span>Campaigns</span><strong>Promotions</strong></div></button>
+          <button class="nav-btn" data-view-target="subscribers" type="button"><div><span>Audience</span><strong>Subscribers</strong></div></button>
+          <button class="nav-btn" data-view-target="account" type="button"><div><span>Profile</span><strong>Account</strong></div></button>
+        </nav>
+        <div class="sidebar-actions">
+          <button class="btn-primary" type="button" id="refreshBtn">Refresh Data</button>
+          <a href="/" class="admin-link"><button class="btn-ghost full-width" type="button">Open Public Site</button></a>
+          <button class="btn-danger" type="button" id="logoutBtn">Logout</button>
+        </div>
+      </aside>
+
+      <main class="content-stack">
+        <section class="topbar">
+          <div class="topbar-copy">
+            <div class="eyebrow">Operations Layer</div>
+            <div class="brand">NOIR<small>DASHBOARD SUITE</small></div>
+            <p class="hero-sub">Homepage plus separated dashboards for menu, bookings, orders, reviews, promotions, and subscriber privacy management.</p>
+          </div>
+        </section>
+
+        <section id="view-home" class="view active">
+          <div class="hero-grid">
+            <article class="panel hero-card">
+              <div>
+                <div class="hero-kicker">Homepage</div>
+                <h1 class="hero-title">One control room. Six focused dashboards.</h1>
+                <p class="hero-sub">Use the sidebar to move between isolated workspaces. The homepage stays dedicated to summary, health, and quick visibility.</p>
+              </div>
+              <div class="hero-meta">
+                <div class="mini-card"><div class="mini-label">Visibility</div><div class="mini-value">Full Stack</div></div>
+                <div class="mini-card"><div class="mini-label">Privacy Mode</div><div class="mini-value">Protected</div></div>
+              </div>
+            </article>
+            <article class="panel card">
+              <div class="section-head"><div><div class="title">Snapshot</div><div class="headline">Live Totals</div></div></div>
+              <div class="stats" id="statsGrid"></div>
+            </article>
+          </div>
+          <div class="overview-grid overview-offset">
+            <section class="panel card">
+              <div class="section-head">
+                <div><div class="title">Recent Reservations</div><div class="headline">Masked List</div></div>
+                <div class="actions">
+                  <button class="btn-ghost btn-small" type="button" onclick="exportData('reservations','pdf')">PDF</button>
+                  <button class="btn-ghost btn-small" type="button" onclick="exportData('reservations','xlsx')">Excel</button>
+                </div>
+              </div>
+              <div id="homeReservations" class="stack"></div>
+            </section>
+            <section class="panel card">
+              <div class="section-head">
+                <div><div class="title">Recent Orders</div><div class="headline">Delivery Flow</div></div>
+                <div class="actions">
+                  <button class="btn-ghost btn-small" type="button" onclick="exportData('orders','pdf')">PDF</button>
+                  <button class="btn-ghost btn-small" type="button" onclick="exportData('orders','xlsx')">Excel</button>
+                </div>
+              </div>
+              <div id="homeOrders" class="stack"></div>
+            </section>
+            <section class="panel card">
+              <div class="section-head">
+                <div><div class="title">Recent Reviews</div><div class="headline">Guest Sentiment</div></div>
+                <div class="actions">
+                  <button class="btn-ghost btn-small" type="button" onclick="exportData('reviews','pdf')">PDF</button>
+                  <button class="btn-ghost btn-small" type="button" onclick="exportData('reviews','xlsx')">Excel</button>
+                </div>
+              </div>
+              <div id="homeReviews" class="stack"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-menu" class="view">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Catalog Dashboard</div>
+              <div class="headline">Menu</div>
+              <p class="sub">Manage dishes, pricing, categories and presentation metadata independently from the rest of the admin.</p>
+            </div>
+          </div>
+          <div class="menu-grid" id="menuCardGrid"></div>
+          <div class="grid">
+            <section class="panel card span-8">
+              <div class="section-head">
+                <div><div class="title">Menu Table</div><div class="headline">Dishes and Pricing</div></div>
+                <div class="actions">
+                  <button class="btn-ghost btn-small" type="button" onclick="exportData('menu','pdf')">Export PDF</button>
+                  <button class="btn-ghost btn-small" type="button" onclick="exportData('menu','xlsx')">Export Excel</button>
+                </div>
+              </div>
+              <div class="table-wrap"><table><thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Rating</th><th>Actions</th></tr></thead><tbody id="menuTable"></tbody></table></div>
+            </section>
+            <section class="panel card span-4">
+              <div class="section-head"><div><div class="title">Editor</div><div class="headline" id="menuFormTitle">Create Dish</div></div></div>
+              <form id="menuForm" class="stack">
+                <div class="field"><label>Name</label><input class="input" id="menuName"></div>
+                <div class="form-grid">
+                  <div class="field"><label>Category</label><select class="select" id="menuCategory"><option value="starters">Starters</option><option value="mains">Mains</option><option value="desserts">Desserts</option><option value="drinks">Drinks</option></select></div>
+                  <div class="field"><label>Price</label><input class="input" id="menuPrice" type="number" step="0.01"></div>
+                </div>
+                <div class="form-grid">
+                  <div class="field"><label>Dish Image URL</label><input class="input" id="menuImage" placeholder="https://..."></div>
+                  <div class="field"><label>Vegetarian</label><select class="select" id="menuVeg"><option value="false">No</option><option value="true">Yes</option></select></div>
+                </div>
+                <div class="form-grid">
+                  <div class="field"><label>Rating</label><input class="input" id="menuRating" type="number" step="0.1"></div>
+                  <div class="field"><label>Reviews Count</label><input class="input" id="menuReviews" type="number"></div>
+                </div>
+                <div class="field"><label>Description</label><textarea class="textarea" id="menuDesc"></textarea></div>
+                <div class="field"><label>Allergens</label><input class="input" id="menuAllergens" placeholder="Shellfish, Cream"></div>
+                <div class="field"><label>Badges</label><input class="input" id="menuBadges" placeholder="popular, new, veg"></div>
+                <div class="actions">
+                  <button class="btn-primary" type="submit">Save Dish</button>
+                  <button class="btn-ghost hidden" id="menuCancel" type="button">Cancel Edit</button>
+                </div>
+              </form>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-inventory" class="view">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Inventory Dashboard</div>
+              <div class="headline">Ingredients</div>
+              <p class="sub">Manage kitchen stock, ingredients, and availability across your restaurant inventory.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <section class="panel card span-7">
+              <div class="section-head">
+                <div><div class="title">Ingredients</div><div class="headline">Stock List</div></div>
+              </div>
+              <div class="table-wrap"><table><thead><tr><th>Name</th><th>Stock</th><th>Unit</th><th>Available</th><th>Actions</th></tr></thead><tbody id="ingredientsTable"></tbody></table></div>
+            </section>
+            <section class="panel card span-5">
+              <div class="section-head"><div><div class="title">Ingredient Editor</div><div class="headline" id="ingredientFormTitle">Add Ingredient</div></div></div>
+              <form id="ingredientForm" class="stack">
+                <div class="field"><label>Name</label><input class="input" id="ingredientName"></div>
+                <div class="form-grid"><div class="field"><label>Stock</label><input class="input" id="ingredientStock" type="number"></div><div class="field"><label>Unit</label><input class="input" id="ingredientUnit" placeholder="pcs, kg"></div></div>
+                <div class="field"><label>Available</label><select class="select" id="ingredientAvailable"><option value="true">Yes</option><option value="false">No</option></select></div>
+                <div class="field"><label>Notes</label><textarea class="textarea" id="ingredientNotes"></textarea></div>
+                <div class="actions"><button class="btn-primary" type="submit">Save Ingredient</button><button class="btn-ghost hidden" id="ingredientCancel" type="button">Cancel</button></div>
+              </form>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-tables" class="view">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Dining Layout</div>
+              <div class="headline">Tables</div>
+              <p class="sub">Manage restaurant tables, seating capacity and availability for bookings.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <section class="panel card span-7">
+              <div class="section-head">
+                <div><div class="title">Table List</div><div class="headline">Dining Setup</div></div>
+              </div>
+              <div class="table-wrap"><table><thead><tr><th>Table ID</th><th>Seats</th><th>Available</th><th>Location</th><th>Actions</th></tr></thead><tbody id="tablesTable"></tbody></table></div>
+            </section>
+            <section class="panel card span-5">
+              <div class="section-head"><div><div class="title">Table Editor</div><div class="headline" id="tableFormTitle">Add Table</div></div></div>
+              <form id="tableForm" class="stack">
+                <div class="field"><label>Table ID</label><input class="input" id="tableId" placeholder="e.g. A1"></div>
+                <div class="form-grid"><div class="field"><label>Seats</label><input class="input" id="tableSeats" type="number"></div><div class="field"><label>Available</label><select class="select" id="tableAvailable"><option value="true">Yes</option><option value="false">No</option></select></div></div>
+                <div class="field"><label>Location</label><input class="input" id="tableLocation" placeholder="Patio, Main hall"></div>
+                <div class="field"><label>Notes</label><textarea class="textarea" id="tableNotes"></textarea></div>
+                <div class="actions"><button class="btn-primary" type="submit">Save Table</button><button class="btn-ghost hidden" id="tableCancel" type="button">Cancel</button></div>
+              </form>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-staff" class="view">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Team Dashboard</div>
+              <div class="headline">Staff Management</div>
+              <p class="sub">Create, edit, and remove kitchen, chef and delivery accounts from the same admin console.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <section class="panel card span-7">
+              <div class="section-head">
+                <div><div class="title">Staff List</div><div class="headline">Kitchen & Delivery</div></div>
+              </div>
+              <div class="table-wrap"><table><thead><tr><th>Username</th><th>Role</th><th>Created</th><th>Last Login</th><th>Actions</th></tr></thead><tbody id="staffTable"></tbody></table></div>
+            </section>
+            <section class="panel card span-5">
+              <div class="section-head"><div><div class="title">Staff Editor</div><div class="headline" id="staffFormTitle">Add Staff</div></div></div>
+              <form id="staffForm" class="stack">
+                <div class="field"><label>Username</label><input class="input" id="staffUsername"></div>
+                <div class="field"><label>Password</label><input class="input" id="staffPassword" type="password"></div>
+                <div class="field"><label>Role</label><select class="select" id="staffRole"><option value="chef">Chef</option><option value="kitchen">Kitchen</option><option value="delivery">Delivery</option></select></div>
+                <div class="actions"><button class="btn-primary" type="submit">Save Staff</button><button class="btn-ghost hidden" id="staffCancel" type="button">Cancel</button></div>
+              </form>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-reservations" class="view">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Bookings Dashboard</div>
+              <div class="headline">Reservations</div>
+              <p class="sub">Client contact details stay masked in the table. Reveal full data only when you inspect a specific reservation.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <section class="panel card span-7">
+              <div class="section-head">
+                <div><div class="title">Reservations Table</div><div class="headline">Privacy-Aware Client Bookings</div></div>
+                <div class="actions">
+                  <button class="btn-ghost btn-small" type="button" onclick="exportData('reservations','pdf')">Export PDF</button>
+                  <button class="btn-ghost btn-small" type="button" onclick="exportData('reservations','xlsx')">Export Excel</button>
+                </div>
+              </div>
+              <div class="table-wrap"><table><thead><tr><th>Name</th><th>Date</th><th>Guests</th><th>Masked Contact</th><th>Status</th><th>Actions</th></tr></thead><tbody id="reservationsTable"></tbody></table></div>
+            </section>
+            <section class="panel card span-5">
+              <div class="section-head"><div><div class="title">Inspection</div><div class="headline">Reveal On Demand</div></div></div>
+              <div id="reservationDetail" class="empty">Select a reservation to inspect masked and full details.</div>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-orders" class="view">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Delivery Dashboard</div>
+              <div class="headline">Orders</div>
+              <p class="sub">Track delivery state, timing and payload structure without mixing order management into the other admin surfaces.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <section class="panel card span-7">
+              <div class="section-head">
+                <div><div class="title">Orders Table</div><div class="headline">Tracking and Delivery</div></div>
+                <div class="actions">
+                  <button class="btn-ghost btn-small" type="button" onclick="exportData('orders','pdf')">Export PDF</button>
+                  <button class="btn-ghost btn-small" type="button" onclick="exportData('orders','xlsx')">Export Excel</button>
+                </div>
+              </div>
+              <div class="table-wrap"><table><thead><tr><th>Order</th><th>Client</th><th>Status</th><th>ETA</th><th>Total</th><th>Actions</th></tr></thead><tbody id="ordersTable"></tbody></table></div>
+            </section>
+            <section class="panel card span-5">
+              <div class="section-head"><div><div class="title">Order Builder</div><div class="headline" id="orderFormTitle">Create Order</div></div></div>
+              <form id="orderForm" class="stack">
+                <div class="form-grid">
+                  <div class="field"><label>Order Number</label><input class="input" id="orderNumber" placeholder="Optional for create"></div>
+                  <div class="field"><label>Status</label><select class="select" id="orderStatus"><option value="confirmed">confirmed</option><option value="being_prepared">being_prepared</option><option value="out_for_delivery">out_for_delivery</option><option value="delivered">delivered</option></select></div>
+                </div>
+                <div class="form-grid">
+                  <div class="field"><label>Client Name</label><input class="input" id="orderCustomerName" placeholder="Client full name"></div>
+                  <div class="field"><label>Client Email</label><input class="input" id="orderCustomerEmail" type="email" placeholder="client@email.com"></div>
+                </div>
+                <div class="form-grid">
+                  <div class="field"><label>ETA</label><input class="input" id="orderEta" placeholder="8 mins"></div>
+                  <div class="field"><label>Total</label><input class="input" id="orderTotal" type="number" step="0.01"></div>
+                </div>
+                <div class="field"><label>Delivery Address</label><input class="input" id="orderDeliveryAddress" placeholder="Street, city"></div>
+                <div class="form-grid">
+                  <div class="field"><label>Delivery Time</label><input class="input" id="orderDeliveryTime" placeholder="20:30"></div>
+                  <div class="field"><label>Contact Phone</label><input class="input" id="orderContactPhone" placeholder="+216 ..."></div>
+                </div>
+                <div class="field"><label>Items (one per line: Name | Quantity | Price | Image URL)</label><textarea class="textarea" id="orderItemsText" placeholder="Boeuf Wellington | 1 | 165 | https://..."></textarea></div>
+                <div class="field"><label>Notes</label><textarea class="textarea" id="orderNotes" placeholder="Special delivery notes..."></textarea></div>
+                <div class="actions">
+                  <button class="btn-primary" type="submit">Save Order</button>
+                  <button class="btn-ghost hidden" id="orderCancel" type="button">Cancel Edit</button>
+                </div>
+              </form>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-reviews" class="view">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Feedback Dashboard</div>
+              <div class="headline">Reviews</div>
+              <p class="sub">Moderation lives in its own dashboard so service quality review stays separate from operations and client data.</p>
+            </div>
+          </div>
+          <section class="panel card">
+            <div class="section-head">
+              <div><div class="title">Moderation Queue</div><div class="headline">Guest Reviews</div></div>
+              <div class="actions">
+                <button class="btn-ghost btn-small" type="button" onclick="exportData('reviews','pdf')">Export PDF</button>
+                <button class="btn-ghost btn-small" type="button" onclick="exportData('reviews','xlsx')">Export Excel</button>
+              </div>
+            </div>
+            <div id="reviewsList" class="stack"></div>
+          </section>
+        </section>
+
+        <section id="view-promotions" class="view">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Campaign Dashboard</div>
+              <div class="headline">Promotions</div>
+              <p class="sub">Manage active and inactive promotions, and publish new campaigns without leaving the admin.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <section class="panel card span-7">
+              <div class="section-head">
+                <div><div class="title">Promotion List</div><div class="headline">Active and Inactive</div></div>
+                <div class="actions">
+                  <button class="btn-ghost btn-small" type="button" onclick="exportData('promotions','pdf')">Export PDF</button>
+                  <button class="btn-ghost btn-small" type="button" onclick="exportData('promotions','xlsx')">Export Excel</button>
+                </div>
+              </div>
+              <div class="table-wrap"><table><thead><tr><th>Promotion</th><th>Code</th><th>Discount</th><th>Status</th><th>Period</th><th>Actions</th></tr></thead><tbody id="promotionsTable"></tbody></table></div>
+            </section>
+            <section class="panel card span-5">
+              <div class="section-head"><div><div class="title">Campaign Builder</div><div class="headline" id="promotionFormTitle">Create Promotion</div></div></div>
+              <form id="promotionForm" class="stack">
+                <div class="field"><label>Title</label><input class="input" id="promotionTitle"></div>
+                <div class="form-grid">
+                  <div class="field"><label>Code</label><input class="input" id="promotionCode" placeholder="WEEKEND25"></div>
+                  <div class="field"><label>Discount</label><input class="input" id="promotionDiscount" placeholder="25%"></div>
+                </div>
+                <div class="field"><label>Description</label><textarea class="textarea" id="promotionDescription"></textarea></div>
+                <div class="form-grid">
+                  <div class="field"><label>Status</label><select class="select" id="promotionStatus"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+                  <div class="field"><label>Starts At</label><input class="input" id="promotionStartsAt" type="date"></div>
+                </div>
+                <div class="field"><label>Ends At</label><input class="input" id="promotionEndsAt" type="date"></div>
+                <div class="actions">
+                  <button class="btn-primary" type="submit">Save Promotion</button>
+                  <button class="btn-ghost hidden" id="promotionCancel" type="button">Cancel Edit</button>
+                </div>
+              </form>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-subscribers" class="view">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Audience Dashboard</div>
+              <div class="headline">Subscribers</div>
+              <p class="sub">Newsletter records remain masked by default. Reveal only individual entries when there is a clear administrative need.</p>
+            </div>
+          </div>
+          <section class="panel card">
+            <div class="section-head">
+              <div><div class="title">Subscriber List</div><div class="headline">Masked by Default</div></div>
+              <div class="actions">
+                <button class="btn-ghost btn-small" type="button" onclick="exportData('subscribers','pdf')">Export PDF</button>
+                <button class="btn-ghost btn-small" type="button" onclick="exportData('subscribers','xlsx')">Export Excel</button>
+              </div>
+            </div>
+            <div id="subscribersList" class="stack"></div>
+          </section>
+        </section>
+
+        <section id="view-account" class="view">
+          <header class="view-header">
+            <div>
+              <div class="eyebrow">Profile Management</div>
+              <div class="headline">Account Settings</div>
+              <p class="hero-sub">Update your admin profile and change password.</p>
+            </div>
+          </header>
+          <div class="view-content">
+            <div class="panel">
+              <div class="tabs">
+                <button class="tab active" onclick="switchAdminTab('profile')">Profile</button>
+                <button class="tab" onclick="switchAdminTab('password')">Password</button>
+              </div>
+              <form id="adminProfileForm" class="stack">
+                <div class="field">
+                  <label>Username</label>
+                  <input class="input" id="adminUsername" readonly>
+                </div>
+                <div class="field">
+                  <label>Role</label>
+                  <input class="input" id="adminRole" value="admin" readonly>
+                </div>
+                <div class="field"><label>First Name</label><input class="input" id="adminFirstName" type="text"></div>
+                <div class="field"><label>Last Name</label><input class="input" id="adminLastName" type="text"></div>
+                <div class="field"><label>Email</label><input class="input" id="adminEmail" type="email"></div>
+                <div class="field"><label>Phone</label><input class="input" id="adminPhone" type="tel"></div>
+                <div class="field"><label>Birth Date</label><input class="input" id="adminBirthDate" type="date"></div>
+                <div class="field">
+                  <label>Profile Photo</label>
+                  <div style="display:flex;gap:12px;align-items:center">
+                    <img id="adminPhotoPreview" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 fill=%23212121/%3E%3Ccircle cx=%2232%22 cy=%2220%22 r=%2212%22 fill=%23fff/%3E%3Cpath d=%22M16 54c0-12 16-16 16-16s16 4 16 16H16z%22 fill=%23fff/%3E%3C/svg%3E" alt="avatar" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:0.5px solid var(--border)">
+                    <input id="adminPicture" type="file" accept="image/*">
+                  </div>
+                </div>
+                <button class="btn-primary" type="button" onclick="updateAdminProfile()">Update Profile</button>
+              </form>
+              <form id="adminPasswordForm" class="stack hidden">
+                <div class="field">
+                  <label>Current Password</label>
+                  <input class="input" id="adminOldPassword" type="password">
+                </div>
+                <div class="field">
+                  <label>New Password</label>
+                  <input class="input" id="adminNewPassword" type="password">
+                </div>
+                <button class="btn-primary" type="button" onclick="changeAdminPassword()">Change Password</button>
+              </form>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</div>
+
+<div id="toastStack" class="toast-stack"></div>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

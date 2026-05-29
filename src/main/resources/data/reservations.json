@@ -1,0 +1,20 @@
+[ {
+  "id" : "c0a6d5e7-9e54-4a92-93d1-7dc22ba563e6",
+  "clientId" : "4c899d39-0998-4c64-a694-d4815a01a245",
+  "confirmationCode" : "NOIR-2026-0001",
+  "status" : "rejected",
+  "createdAt" : "2026-05-07T00:57:33.165303100Z",
+  "firstName" : "ilef",
+  "lastName" : "mhamdi",
+  "email" : "ilefmhamdi2003@gmail.com",
+  "phone" : "+21623382262",
+  "date" : "2026-05-10",
+  "guests" : 2,
+  "time" : "19:00",
+  "experience" : "À la Carte",
+  "menuSelections" : [ "Foie Gras Poêlé (1)", "Velouté de Champignons (1)", "Boeuf Wellington (1)", "Fondant au Chocolat (2)" ],
+  "allergySelections" : [ "Dairy", "Nuts" ],
+  "specialRequests" : "",
+  "notes" : "",
+  "rejectedReason" : "Reservation rejected"
+} ]

@@ -1,0 +1,45 @@
+[
+  {
+    "id": "aae0c748-a31d-4716-9ccc-889da3c9a03e",
+    "clientId": "d47f59e6-d60c-40ae-956a-408d3e5b4b23",
+    "clientName": "ilef mhamdi",
+    "clientEmail": "ilefmhamdi2003@gmail.com",
+    "name": "ilef mhamdi",
+    "avatar": "IM",
+    "platform": "Client Portal",
+    "createdAt": "2026-04-23T15:14:30.533Z",
+    "date": "2026-04-23",
+    "rating": 4,
+    "text": "i like the experience"
+  },
+  {
+    "id": "seed-review-1",
+    "name": "Amira Ben Salah",
+    "avatar": "ABS",
+    "rating": 5,
+    "text": "Une soiree extraordinaire du debut a la fin. Le Boeuf Wellington etait parfait, savoureux, riche et magnifiquement presente.",
+    "date": "2024-12-14",
+    "platform": "TripAdvisor",
+    "createdAt": "2024-12-14T20:15:00.000Z"
+  },
+  {
+    "id": "seed-review-2",
+    "name": "Mohamed Triki",
+    "avatar": "MT",
+    "rating": 5,
+    "text": "Chef Karim a cree quelque chose de veritablement magique. Le menu degustation vous emmene dans un voyage inoubliable.",
+    "date": "2024-11-20",
+    "platform": "Google",
+    "createdAt": "2024-11-20T19:30:00.000Z"
+  },
+  {
+    "id": "seed-review-3",
+    "name": "Leila Mansouri",
+    "avatar": "LM",
+    "rating": 5,
+    "text": "L'atmosphere seule vaut le detour. Elegant, intime et parfaitement soigne. Les accords mets et vins etaient exceptionnels.",
+    "date": "2024-12-03",
+    "platform": "Facebook",
+    "createdAt": "2024-12-03T21:00:00.000Z"
+  }
+]

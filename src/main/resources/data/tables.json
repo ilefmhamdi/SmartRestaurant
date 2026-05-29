@@ -1,0 +1,7 @@
+[ {
+  "id" : "01",
+  "seats" : 4,
+  "available" : false,
+  "location" : "Patio",
+  "notes" : ""
+} ]

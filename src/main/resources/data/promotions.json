@@ -1,0 +1,38 @@
+[
+  {
+    "id": "promotion-weekend-brunch",
+    "title": "Weekend Brunch",
+    "code": "BRUNCH25",
+    "discount": "25%",
+    "description": "Enjoy 25% off all a la carte brunch items every Saturday morning.",
+    "status": "active",
+    "startsAt": "",
+    "endsAt": "",
+    "createdAt": "2026-04-23T00:00:00.000Z",
+    "updatedAt": "2026-04-23T15:33:04.545Z"
+  },
+  {
+    "id": "promotion-cocktail-hour",
+    "title": "Cocktail Hour",
+    "code": "HAPPYHOUR",
+    "discount": "2x1",
+    "description": "Two cocktails for the price of one from 5pm to 7pm on weekdays.",
+    "status": "active",
+    "startsAt": "",
+    "endsAt": "",
+    "createdAt": "2026-04-23T00:00:00.000Z",
+    "updatedAt": "2026-04-23T00:00:00.000Z"
+  },
+  {
+    "id": "promotion-early-dinner",
+    "title": "Early Dinner",
+    "code": "EARLY15",
+    "discount": "15%",
+    "description": "Receive 15% off when booking dinner before 6:30pm.",
+    "status": "inactive",
+    "startsAt": "",
+    "endsAt": "",
+    "createdAt": "2026-04-23T00:00:00.000Z",
+    "updatedAt": "2026-04-23T00:00:00.000Z"
+  }
+]

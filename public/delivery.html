@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOIR — Delivery Console</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+<style>
+.d-status { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:50px; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; font-weight:500; }
+.s-ready         { background:rgba(46,204,113,.15);  border:.5px solid var(--green);  color:var(--green); }
+.s-out_for_delivery{ background:rgba(155,89,182,.15); border:.5px solid #c39bd3;      color:#c39bd3; }
+.s-delivered     { background:rgba(22,160,133,.15);  border:.5px solid #1abc9c;       color:#1abc9c; }
+.s-confirmed     { background:rgba(201,168,76,.15);  border:.5px solid var(--gold);   color:var(--gold); }
+.s-being_prepared{ background:rgba(52,152,219,.15);  border:.5px solid #5aafe8;       color:#5aafe8; }
+.oi-row   { display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom:.5px solid var(--border); }
+.oi-row:last-child{ border-bottom:none; }
+.oi-img   { width:40px; height:40px; object-fit:cover; border-radius:6px; border:.5px solid var(--border); }
+.oi-fall  { width:40px; height:40px; border:.5px solid var(--border); border-radius:6px; display:flex; align-items:center; justify-content:center; color:var(--gold); font-size:12px; }
+.tab-bar  { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+.tab-btn  { padding:8px 18px; border:.5px solid var(--border); border-radius:50px; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); background:transparent; cursor:pointer; transition:all .25s; }
+.tab-btn.active,.tab-btn:hover { border-color:var(--gold); color:var(--gold); background:rgba(201,168,76,.08); }
+.delivery-action { padding:16px; background:rgba(201,168,76,.06); border:.5px solid var(--border2); border-radius:var(--radius); margin-top:14px; }
+</style>
+</head>
+<body class="admin-page">
+<div class="wrap">
+
+  <!-- Login Card -->
+  <div id="loginView" class="panel login-card">
+    <div class="title">Delivery Access</div>
+    <div class="headline">NOIR Delivery</div>
+    <p class="sub login-sub">Sign in with your delivery credentials to see ready orders and update delivery status.</p>
+    <form id="loginForm" class="stack">
+      <div class="field"><label>Username</label><input class="input" id="du" autocomplete="username" placeholder="Your username"></div>
+      <div class="field"><label>Password</label><input class="input" id="dp" type="password" placeholder="Password" autocomplete="current-password"></div>
+      <button class="btn-primary" type="submit"><i class="fas fa-motorcycle"></i> Sign In to Delivery</button>
+    </form>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashView" class="hidden">
+    <div class="admin-shell">
+      <aside class="panel sidebar">
+        <div class="sidebar-brand">
+          <div class="eyebrow">Delivery Operations</div>
+          <div class="brand">NOIR<small>DELIVERY CONSOLE</small></div>
+          <p class="hero-sub">See ready orders, mark pickups, and confirm deliveries in real time.</p>
+          <div style="margin-top:12px;display:flex;align-items:center;gap:10px;">
+            <span style="display:inline-flex;padding:4px 10px;border-radius:50px;font-size:10px;letter-spacing:2px;text-transform:uppercase;background:rgba(155,89,182,.15);border:.5px solid #c39bd3;color:#c39bd3">delivery</span>
+            <span id="driverName" style="font-size:13px;color:var(--text-muted)"></span>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <button class="nav-btn active" data-view="queue" type="button"><div><span>Ready for Pickup</span><strong>Delivery Queue</strong></div></button>
+          <button class="nav-btn" data-view="active" type="button"><div><span>On the Road</span><strong>My Deliveries</strong></div></button>
+          <button class="nav-btn" data-view="history" type="button"><div><span>Completed Today</span><strong>History</strong></div></button>
+          <button class="nav-btn" data-view="account" type="button"><div><span>My Profile</span><strong>Account</strong></div></button>
+        </nav>
+        <div class="sidebar-actions">
+          <button class="btn-primary" type="button" id="refreshBtn">Refresh</button>
+          <button class="btn-danger" type="button" id="logoutBtn">Logout</button>
+        </div>
+      </aside>
+
+      <main class="content-stack">
+        <section class="topbar">
+          <div class="topbar-copy">
+            <div class="eyebrow">Delivery Staff Portal</div>
+            <div class="brand">NOIR<small>DELIVERY DASHBOARD</small></div>
+            <p class="hero-sub">Pick up ready orders, manage your active deliveries, and confirm drop-offs.</p>
+          </div>
+        </section>
+
+        <!-- Queue: ready orders -->
+        <section id="view-queue" class="view active">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Pickup Queue</div>
+              <div class="headline">Ready for Delivery</div>
+              <p class="sub">Orders marked as ready by the kitchen. Pick them up and start your delivery run.</p>
+            </div>
+            <div id="queueBadge" class="muted" style="font-size:11px;letter-spacing:1px;white-space:nowrap;"></div>
+          </div>
+          <div class="grid">
+            <section class="panel card span-7">
+              <div class="section-head">
+                <div><div class="title">Ready Orders</div><div class="headline">Awaiting Pickup</div></div>
+              </div>
+              <div class="table-wrap">
+                <table><thead><tr><th>Order</th><th>Customer</th><th>Address</th><th>Items</th><th>Total</th><th>Action</th></tr></thead>
+                <tbody id="queueTable"></tbody></table>
+              </div>
+            </section>
+            <section class="panel card span-5">
+              <div class="section-head"><div><div class="title">Detail</div><div class="headline" id="qDetailTitle">Select an Order</div></div></div>
+              <div id="queueDetail" class="empty">Click an order to see full delivery details and pick it up.</div>
+            </section>
+          </div>
+        </section>
+
+        <!-- Active: out_for_delivery -->
+        <section id="view-active" class="view">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Active Run</div>
+              <div class="headline">My Deliveries</div>
+              <p class="sub">Orders currently out for delivery. Confirm drop-off once you reach the customer.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <section class="panel card span-7">
+              <div class="section-head">
+                <div><div class="title">On the Road</div><div class="headline">Out for Delivery</div></div>
+              </div>
+              <div class="table-wrap">
+                <table><thead><tr><th>Order</th><th>Customer</th><th>Address</th><th>Time</th><th>Total</th><th>Action</th></tr></thead>
+                <tbody id="activeTable"></tbody></table>
+              </div>
+            </section>
+            <section class="panel card span-5">
+              <div class="section-head"><div><div class="title">Detail</div><div class="headline" id="aDetailTitle">Select an Order</div></div></div>
+              <div id="activeDetail" class="empty">Click an order to see delivery details and confirm drop-off.</div>
+            </section>
+          </div>
+        </section>
+
+        <!-- History: delivered -->
+        <section id="view-history" class="view">
+          <div class="view-head">
+            <div class="view-copy">
+              <div class="title">Completed</div>
+              <div class="headline">Delivery History</div>
+              <p class="sub">Orders successfully delivered. Loaded from the full order list.</p>
+            </div>
+          </div>
+          <section class="panel card">
+            <div class="section-head">
+              <div><div class="title">Delivered Orders</div><div class="headline">Completed Runs</div></div>
+              <span id="histCount" class="muted" style="font-size:11px;letter-spacing:1px;"></span>
+            </div>
+            <div class="table-wrap">
+              <table><thead><tr><th>Order</th><th>Customer</th><th>Address</th><th>Total</th><th>Delivered At</th></tr></thead>
+              <tbody id="historyTable"></tbody></table>
+            </div>
+          </section>
+        </section>
+
+        <section id="view-account" class="view">
+          <header class="view-header">
+            <div>
+              <div class="eyebrow">Profile Management</div>
+              <div class="headline">My Account</div>
+              <p class="hero-sub">Update your username and change password.</p>
+            </div>
+          </header>
+          <div class="view-content">
+            <div class="panel">
+              <div class="tabs">
+                <button class="tab active" onclick="switchDeliveryTab('profile')">Profile</button>
+                <button class="tab" onclick="switchDeliveryTab('password')">Password</button>
+              </div>
+              <form id="deliveryProfileForm" class="stack">
+                <div class="field">
+                  <label>Username</label>
+                  <input class="input" id="deliveryUsername" type="text" required>
+                </div>
+                <div class="field">
+                  <label>Role</label>
+                  <input class="input" id="deliveryRole" readonly>
+                </div>
+                <div class="field"><label>First Name</label><input class="input" id="deliveryFirstName" type="text"></div>
+                <div class="field"><label>Last Name</label><input class="input" id="deliveryLastName" type="text"></div>
+                <div class="field"><label>Email</label><input class="input" id="deliveryEmail" type="email"></div>
+                <div class="field"><label>Phone</label><input class="input" id="deliveryPhone" type="tel"></div>
+                <div class="field"><label>Birth Date</label><input class="input" id="deliveryBirthDate" type="date"></div>
+                <div class="field"><label>Profile Photo</label><input class="input" id="deliveryPicture" type="file" accept="image/*"></div>
+                <button class="btn-primary" type="button" onclick="updateDeliveryProfile()">Update Profile</button>
+              </form>
+              <form id="deliveryPasswordForm" class="stack hidden">
+                <div class="field">
+                  <label>Current Password</label>
+                  <input class="input" id="deliveryOldPassword" type="password" required>
+                </div>
+                <div class="field">
+                  <label>New Password</label>
+                  <input class="input" id="deliveryNewPassword" type="password" required minlength="8">
+                </div>
+                <button class="btn-primary" type="button" onclick="changeDeliveryPassword()">Change Password</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+const API = '/api/delivery';
+const TK  = 'noir-delivery-token';
+const st  = { token: localStorage.getItem(TK)||'', staff: null, allOrders: [] };
+
+const esc = v => String(v??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function toast(msg, type='success') {
+  const el = Object.assign(document.createElement('div'), { className:`toast ${type}`, innerHTML:`<i class="toast-icon fas ${type==='success'?'fa-check-circle':'fa-exclamation-circle'}"></i> ${esc(msg)}` });
+  document.getElementById('toastStack').appendChild(el);
+  setTimeout(()=>el.classList.add('show'),10);
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),250);},3200);
+}
+
+async function api(path, opts={}) {
+  const cfg = {...opts, headers:{...(opts.headers||{})}};
+  if (st.token) cfg.headers.Authorization = `Bearer ${st.token}`;
+  if (cfg.body && !cfg.headers['Content-Type']) cfg.headers['Content-Type'] = 'application/json';
+  const res = await fetch(`${API}${path}`, cfg);
+  const json = await res.json().catch(()=>({}));
+  if (!res.ok) throw new Error(json.message||'Request failed');
+  return json.data;
+}
+
+const sLabels = { ready:'Ready', out_for_delivery:'Out for Delivery', delivered:'Delivered', confirmed:'Confirmed', being_prepared:'Being Prepared' };
+const badge = s => `<span class="d-status s-${esc(s)}">${esc(sLabels[s]||s)}</span>`;
+
+// Login
+document.getElementById('loginForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  try {
+    const d = await api('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:document.getElementById('du').value,password:document.getElementById('dp').value})});
+    st.token = d.token; st.staff = d.user;
+    localStorage.setItem(TK, st.token);
+    boot();
+  } catch(err) { toast(err.message,'error'); }
+});
+
+function boot() {
+  document.getElementById('loginView').classList.add('hidden');
+  document.getElementById('dashView').classList.remove('hidden');
+  document.getElementById('driverName').textContent = st.staff.username;
+  loadAll();
+}
+
+// Nav
+document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById(`view-${b.dataset.view}`).classList.add('active');
+}));
+document.getElementById('logoutBtn').addEventListener('click',()=>{localStorage.removeItem(TK);location.reload();});
+document.getElementById('refreshBtn').addEventListener('click',loadAll);
+
+// Load
+async function loadAll() {
+  try {
+    const orders = await api('/orders');
+    st.allOrders = orders;
+    const ready = orders.filter(o=>o.status==='ready');
+    const active = orders.filter(o=>o.status==='out_for_delivery');
+    renderQueue(ready);
+    renderActive(active);
+    // History: try to load delivered — they won't come from /orders (only ready+ofd)
+    // We'll show a note; admin can see full history
+    renderHistory();
+  } catch(err) { toast(err.message,'error'); }
+}
+
+// Queue (ready)
+function renderQueue(list) {
+  document.getElementById('queueBadge').textContent = `${list.length} order${list.length!==1?'s':''} waiting`;
+  const tb = document.getElementById('queueTable');
+  if (!list.length) { tb.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">No orders ready for pickup right now.</td></tr>`; return; }
+  tb.innerHTML = list.map(o=>`
+    <tr style="cursor:pointer" onclick="showQueueDetail('${esc(o.orderNumber)}')">
+      <td><strong>${esc(o.orderNumber)}</strong></td>
+      <td>${esc(o.customerName)}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(o.deliveryAddress)}</td>
+      <td>${(o.items||[]).length}</td>
+      <td>${o.total} TND</td>
+      <td><button class="btn-primary btn-small" onclick="event.stopPropagation();pickup('${esc(o.orderNumber)}')"><i class="fas fa-motorcycle"></i> Pick Up</button></td>
+    </tr>`).join('');
+}
+
+function showQueueDetail(num) {
+  const o = st.allOrders.find(x=>x.orderNumber===num); if(!o) return;
+  document.getElementById('qDetailTitle').textContent = o.orderNumber;
+  document.getElementById('queueDetail').innerHTML = orderDetailHtml(o, `
+    <div class="delivery-action">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Ready for Pickup</div>
+      <button class="btn-primary" onclick="pickup('${esc(o.orderNumber)}')"><i class="fas fa-motorcycle"></i> Pick Up This Order</button>
+    </div>`);
+}
+
+async function pickup(num) {
+  try {
+    await api(`/orders/${encodeURIComponent(num)}/pickup`,{method:'PATCH'});
+    toast(`${num} → out for delivery!`);
+    await loadAll();
+    // Switch to active tab
+    document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+    document.querySelector('.nav-btn[data-view="active"]').classList.add('active');
+    document.getElementById('view-active').classList.add('active');
+    const updated = st.allOrders.find(x=>x.orderNumber===num);
+    if (updated) showActiveDetail(num);
+  } catch(err) { toast(err.message,'error'); }
+}
+
+// Active (out_for_delivery)
+function renderActive(list) {
+  const tb = document.getElementById('activeTable');
+  if (!list.length) { tb.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">No active deliveries. Pick up a ready order from the queue.</td></tr>`; return; }
+  tb.innerHTML = list.map(o=>`
+    <tr style="cursor:pointer" onclick="showActiveDetail('${esc(o.orderNumber)}')">
+      <td><strong>${esc(o.orderNumber)}</strong></td>
+      <td>${esc(o.customerName)}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(o.deliveryAddress)}</td>
+      <td>${esc(o.deliveryTime)}</td>
+      <td>${o.total} TND</td>
+      <td><button class="btn-primary btn-small" onclick="event.stopPropagation();deliver('${esc(o.orderNumber)}')"><i class="fas fa-check"></i> Delivered</button></td>
+    </tr>`).join('');
+}
+
+function showActiveDetail(num) {
+  const o = st.allOrders.find(x=>x.orderNumber===num); if(!o) return;
+  document.getElementById('aDetailTitle').textContent = o.orderNumber;
+  document.getElementById('activeDetail').innerHTML = orderDetailHtml(o, `
+    <div class="delivery-action">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Confirm Drop-off</div>
+      <p class="sub" style="margin-bottom:10px">Once you have handed the order to the customer, mark it as delivered.</p>
+      <button class="btn-primary" onclick="deliver('${esc(o.orderNumber)}')"><i class="fas fa-check"></i> Mark as Delivered</button>
+    </div>`);
+}
+
+async function deliver(num) {
+  try {
+    await api(`/orders/${encodeURIComponent(num)}/delivered`,{method:'PATCH'});
+    toast(`Order ${num} delivered successfully!`);
+    await loadAll();
+    document.getElementById('activeDetail').innerHTML = `<div class="empty" style="color:var(--green)"><i class="fas fa-check-circle" style="font-size:24px;display:block;margin-bottom:10px"></i>Order ${esc(num)} marked as delivered!</div>`;
+  } catch(err) { toast(err.message,'error'); }
+}
+
+// History (delivered) — delivery API only shows ready+ofd, so explain this
+function renderHistory() {
+  const tb = document.getElementById('historyTable');
+  // Delivered orders are not returned by /api/delivery/orders (by design, only ready+ofd)
+  // Show a helpful message
+  tb.innerHTML = `<tr><td colspan="5" style="padding:24px;text-align:center;color:var(--text-muted);font-size:12px;line-height:1.8">
+    Delivered orders are removed from the delivery queue automatically.<br>
+    <span style="font-size:11px;opacity:.7">The admin dashboard has the full order history.</span>
+  </td></tr>`;
+  document.getElementById('histCount').textContent = '';
+}
+
+// Shared order detail HTML
+function orderDetailHtml(o, actionHtml='') {
+  const itemsHtml = (o.items||[]).map(i=>`
+    <div class="oi-row">
+      ${i.image?`<img src="${esc(i.image)}" class="oi-img">`:`<div class="oi-fall"><i class="fas fa-utensils"></i></div>`}
+      <div style="flex:1"><div style="font-size:13px">${esc(i.name)}</div><div class="muted" style="font-size:11px">×${i.quantity} · ${i.price} TND</div></div>
+      <div style="color:var(--gold)">${(i.price*i.quantity).toFixed(2)} TND</div>
+    </div>`).join('');
+  return `
+    <div style="background:var(--surface2);border:.5px solid var(--border2);border-radius:var(--radius-lg);padding:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">${badge(o.status)}<span class="muted" style="font-size:11px">${new Date(o.createdAt).toLocaleString()}</span></div>
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Delivery Details</div>
+      <div class="muted" style="font-size:13px;margin-bottom:4px"><i class="fas fa-user"></i> <strong>${esc(o.customerName)}</strong></div>
+      <div class="muted" style="font-size:12px;margin-bottom:4px"><i class="fas fa-envelope"></i> ${esc(o.customerEmail)}</div>
+      <div class="muted" style="font-size:12px;margin-bottom:4px"><i class="fas fa-phone"></i> ${esc(o.contactPhone)}</div>
+      <div style="margin:10px 0;padding:12px;background:rgba(201,168,76,.06);border:.5px solid var(--border2);border-radius:var(--radius)">
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:6px"><i class="fas fa-location-dot"></i> Drop-off Address</div>
+        <div style="font-size:13px;font-weight:500">${esc(o.deliveryAddress)}</div>
+        <div class="muted" style="font-size:11px;margin-top:4px">Expected: ${esc(o.deliveryTime)} · ETA ${esc(o.eta)}</div>
+      </div>
+      ${o.notes?`<div style="padding:8px 12px;background:rgba(201,168,76,.04);border:.5px solid var(--border);border-radius:var(--radius);font-size:12px;margin-bottom:10px;color:var(--text-muted)"><i class="fas fa-comment"></i> ${esc(o.notes)}</div>`:''}
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">Items</div>
+      ${itemsHtml}
+      <div style="display:flex;justify-content:space-between;padding-top:10px;border-top:.5px solid var(--border);margin-top:8px"><span class="muted">Total</span><strong style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.2rem">${o.total} TND</strong></div>
+      ${actionHtml}
+    </div>`;
+}
+
+// ─── ACCOUNT ────────────────────────────────────────────────────────────────
+
+function switchDeliveryTab(mode) {
+  const isProfile = mode === 'profile';
+  document.querySelectorAll('#view-account .tab').forEach((tab, index) => {
+    tab.classList.toggle('active', index === (isProfile ? 0 : 1));
+  });
+  document.getElementById('deliveryProfileForm').classList.toggle('hidden', !isProfile);
+  document.getElementById('deliveryPasswordForm').classList.toggle('hidden', isProfile);
+  if (isProfile) loadDeliveryProfile();
+}
+
+async function loadDeliveryProfile() {
+  try {
+    const user = await api('/me');
+    document.getElementById('deliveryUsername').value = user.username || '';
+    document.getElementById('deliveryRole').value = user.role || '';
+    document.getElementById('deliveryFirstName').value = user.firstName || '';
+    document.getElementById('deliveryLastName').value = user.lastName || '';
+    document.getElementById('deliveryEmail').value = user.email || '';
+    document.getElementById('deliveryPhone').value = user.phone || '';
+    document.getElementById('deliveryBirthDate').value = user.birthDate || '';
+  } catch (err) {
+    toast('Failed to load profile', 'error');
+  }
+}
+
+async function updateDeliveryProfile() {
+  const username = document.getElementById('deliveryUsername').value.trim();
+  const firstName = document.getElementById('deliveryFirstName').value.trim();
+  const lastName = document.getElementById('deliveryLastName').value.trim();
+  const email = document.getElementById('deliveryEmail').value.trim();
+  const phone = document.getElementById('deliveryPhone').value.trim();
+  const birthDate = document.getElementById('deliveryBirthDate').value;
+  const fileInput = document.getElementById('deliveryPicture');
+  if (!username) {
+    toast('Username is required', 'error');
+    return;
+  }
+  try {
+    let profilePicture = null;
+    if (fileInput && fileInput.files && fileInput.files[0]) {
+      profilePicture = await toDataURL(fileInput.files[0]);
+    }
+    await api('/me', {
+      method: 'PUT',
+      body: JSON.stringify({ username, firstName, lastName, email, phone, birthDate, profilePicture })
+    });
+    toast('Profile updated successfully');
+  } catch (err) {
+    toast(err.message, 'error');
+  }
+}
+
+async function changeDeliveryPassword() {
+  const oldPassword = document.getElementById('deliveryOldPassword').value;
+  const newPassword = document.getElementById('deliveryNewPassword').value;
+  if (!oldPassword || !newPassword) {
+    toast('Both passwords are required', 'error');
+    return;
+  }
+  if (newPassword.length < 8) {
+    toast('New password must be at least 8 characters', 'error');
+    return;
+  }
+  try {
+    await api('/me/password', {
+      method: 'PUT',
+      body: JSON.stringify({ oldPassword, newPassword })
+    });
+    toast('Password changed successfully');
+    document.getElementById('deliveryOldPassword').value = '';
+    document.getElementById('deliveryNewPassword').value = '';
+  } catch (err) {
+    toast(err.message, 'error');
+  }
+}
+
+// Auto-login check
+if (st.token) {
+  api('/orders').then(()=>{
+    try { const p=JSON.parse(atob(st.token.split('.')[0])); st.staff={username:p.username,role:p.role}; boot(); }
+    catch{ localStorage.removeItem(TK); }
+  }).catch(()=>{ localStorage.removeItem(TK); st.token=''; });
+}
+</script>
+</body>
+</html>
