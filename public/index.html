@@ -32,6 +32,7 @@
     <button class="nav-btn hidden" id="clientLogoutBtn" onclick="logoutClient()">Logout</button>
     <div class="nav-btn" onclick="openOrderModal()">Order</div>
     <div class="nav-btn" onclick="openReservationModal('reserve')">Reserve Table</div>
+    <button class="nav-btn" id="langBtn" onclick="toggleLang()">FR</button>
     <div class="nav-account" id="accountBtn" onclick="openAccountModal()"><i class="fa-solid fa-circle-user"></i></div>
   </div>
 </nav>
@@ -41,9 +42,9 @@
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
   <div class="hero-content">
-    <p class="hero-eyebrow">Est. 2015 · Michelin <i class="fas fa-star"></i><i class="fas fa-star"></i></p>
-    <h1 class="hero-title">Where <em>Darkness</em><br>Meets Light</h1>
-    <p class="hero-sub">A culinary journey beyond the ordinary</p>
+    <p class="hero-eyebrow" id="heroEyebrowEl">Est. 2015 · Michelin <i class="fas fa-star"></i><i class="fas fa-star"></i></p>
+    <h1 class="hero-title" id="heroTitleEl">Where <em>Darkness</em><br>Meets Light</h1>
+    <p class="hero-sub" id="heroSubEl">A culinary journey beyond the ordinary</p>
     <div class="hero-ctas">
       <button class="btn-primary" onclick="scrollSec('menu')">Explore Menu</button>
       <button class="btn-ghost" onclick="scrollSec('reservation')">Book a Table</button>
@@ -70,9 +71,9 @@
 <section id="menu">
   <div class="menu-header">
     <div>
-      <p class="section-eyebrow">Culinary Creations</p>
-      <h2 class="section-title">Our <em>Signature</em> Menu</h2>
-      <p class="section-sub">Each dish crafted with seasonal ingredients, locally sourced and prepared with classical French technique.</p>
+      <p class="section-eyebrow" id="menuEyebrowEl">Culinary Creations</p>
+      <h2 class="section-title" id="menuTitleEl">Our <em>Signature</em> Menu</h2>
+      <p class="section-sub" id="menuSubEl">Each dish crafted with seasonal ingredients, locally sourced and prepared with classical French technique.</p>
     </div>
     <div class="menu-filters">
       <button class="filter-btn active" onclick="filterMenu('all',this)">All</button>
@@ -92,10 +93,10 @@
   <div class="reservation-deco2"></div>
   <div class="reservation-layout">
     <div class="res-info fade-in">
-      <p class="section-eyebrow">Book Your Evening</p>
-      <h2 class="section-title">Reserve <em>Your</em><br>Table</h2>
+      <p class="section-eyebrow" id="resEyebrowEl">Book Your Evening</p>
+      <h2 class="section-title" id="resTitleEl">Reserve <em>Your</em><br>Table</h2>
       <div class="divider"></div>
-      <p class="section-sub">Secure your spot for an unforgettable evening. Private dining rooms available for special occasions.</p>
+      <p class="section-sub" id="resSubEl">Secure your spot for an unforgettable evening. Private dining rooms available for special occasions.</p>
       <div class="res-features">
         <div class="res-feature"><div class="res-icon"><i class="fas fa-fire"></i></div><div class="res-feature-text"><strong>Candlelit Atmosphere</strong><br>Every table thoughtfully arranged</div></div>
         <div class="res-feature"><div class="res-icon"><i class="fas fa-wine-glass"></i></div><div class="res-feature-text"><strong>Sommelier on Call</strong><br>Expert cocktail pairing available</div></div>
@@ -105,9 +106,9 @@
     </div>
     <div class="res-cta-card">
       <div>
-        <p class="section-eyebrow">Reserve with ease</p>
-        <h3 class="section-title" style="font-size:2rem;margin-top:0">Book <em>Your</em> Table</h3>
-        <p class="section-sub">Your complete reservation form — including dish pre-selection, allergy notes, and your booking history — opens in a popup.</p>
+        <p class="section-eyebrow" id="resCtaEyebrowEl">Reserve with ease</p>
+        <h3 class="section-title" id="resCtaTitleEl" style="font-size:2rem;margin-top:0">Book <em>Your</em> Table</h3>
+        <p class="section-sub" id="resCtaSubEl">Your complete reservation form — including dish pre-selection, allergy notes, and your booking history — opens in a popup.</p>
       </div>
       <div class="res-cta-features">
         <div class="res-cta-feat"><i class="fas fa-calendar-check"></i>Choose date, time &amp; dining experience</div>
@@ -116,7 +117,7 @@
         <div class="res-cta-feat"><i class="fas fa-list"></i>View &amp; cancel your existing reservations</div>
       </div>
       <button class="submit-btn" type="button" onclick="openReservationModal('reserve')">
-        <i class="fas fa-calendar-plus"></i> Open Reservation Popup
+        <i class="fas fa-calendar-plus"></i> <span id="resCtaBtnEl">Open Reservation Popup</span>
       </button>
     </div>
   </div>
@@ -125,8 +126,8 @@
 <!-- Loyalty Program -->
 <section id="loyalty" class="client-only hidden">
   <div class="fade-in">
-    <p class="section-eyebrow">Member Rewards</p>
-    <h2 class="section-title">The NOIR <em>Circle</em></h2>
+    <p class="section-eyebrow" id="loyaltyEyebrowEl">Member Rewards</p>
+    <h2 class="section-title" id="loyaltyTitleEl">The NOIR <em>Circle</em></h2>
     <div class="divider"></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:4rem;align-items:start;margin-top:2rem">
@@ -154,7 +155,7 @@
       </div>
     </div>
     <div class="fade-in">
-      <div style="font-size:13px;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.8">Earn points with every visit, unlock exclusive perks, and enjoy privileges reserved for our most valued guests.</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.8"><span id="loyaltySubEl">Earn points with every visit, unlock exclusive perks, and enjoy privileges reserved for our most valued guests.</span></div>
       <div class="perks-grid">
         <div class="perk-card"><div class="perk-icon"><i class="fas fa-birthday-cake"></i></div><div class="perk-name">Birthday Surprise</div><div class="perk-desc">Complimentary dessert &amp; champagne on your birthday</div></div>
         <div class="perk-card"><div class="perk-icon"><i class="fas fa-medal"></i></div><div class="perk-name">Priority Booking</div><div class="perk-desc">First access to reservations &amp; special events</div></div>
@@ -170,8 +171,8 @@
 <!-- Offers & Promotions -->
 <section id="offers" class="client-only hidden">
   <div class="fade-in">
-    <p class="section-eyebrow">Exclusive Deals</p>
-    <h2 class="section-title">Offers &amp; <em>Promotions</em></h2>
+    <p class="section-eyebrow" id="offersEyebrowEl">Exclusive Deals</p>
+    <h2 class="section-title" id="offersTitleEl">Offers &amp; <em>Promotions</em></h2>
   </div>
   <div class="offers-grid" id="offersGrid"></div>
 </section>
@@ -186,11 +187,11 @@
       </div>
     </div>
     <div class="fade-in">
-      <p class="section-eyebrow">The Master Chef</p>
-      <h2 class="section-title">Chef <em>Karim Bennani</em></h2>
+      <p class="section-eyebrow" id="chefEyebrowEl">The Master Chef</p>
+      <h2 class="section-title" id="chefTitleEl">Chef <em>Karim Bennani</em></h2>
       <div class="divider"></div>
-      <p class="section-sub" style="max-width:100%;margin-bottom:1.5rem">With over 20 years of culinary expertise across Paris, Lyon, and Tunis, Chef Karim Bennani merges French elegance with Mediterranean flavors. His passion for excellence has made NOIR a destination for discerning diners.</p>
-      <p class="section-sub" style="max-width:100%;font-style:italic;color:var(--text-dim)">"Cuisine is the art of bringing people together through taste, tradition, and innovation."</p>
+      <p class="section-sub" style="max-width:100%;margin-bottom:1.5rem"><span id="chefBioEl">With over 20 years of culinary expertise across Paris, Lyon, and Tunis, Chef Karim Bennani merges French elegance with Mediterranean flavors. His passion for excellence has made NOIR a destination for discerning diners.</span></p>
+      <p class="section-sub" style="max-width:100%;font-style:italic;color:var(--text-dim)"><span id="chefQuoteEl">"Cuisine is the art of bringing people together through taste, tradition, and innovation."</span></p>
       <span class="chef-signature">— Karim Bennani</span>
       <div class="awards">
         <div class="award"><div class="award-icon"><i class="fas fa-star"></i></div><div><div class="award-name">Michelin Star 2019</div><div class="award-text">Awarded for exceptional cuisine</div></div></div>
@@ -205,8 +206,8 @@
 <!-- About -->
 <section id="about">
   <div class="fade-in">
-    <p class="section-eyebrow">About NOIR</p>
-    <h2 class="section-title">Our <em>Story</em></h2>
+    <p class="section-eyebrow" id="aboutEyebrowEl">About NOIR</p>
+    <h2 class="section-title" id="aboutTitleEl">Our <em>Story</em></h2>
     <p class="section-sub" id="aboutStory">Since 2015, NOIR has served refined dining experiences in Tunis for more than 12 years, combining French precision, Mediterranean ingredients, and hospitality-first service.</p>
   </div>
   <div class="about-milestones fade-in">
@@ -225,14 +226,14 @@
 <!-- Reviews -->
 <section id="reviews" style="background:var(--darker)">
   <div class="fade-in">
-    <p class="section-eyebrow">Guest Voices</p>
-    <h2 class="section-title">What Our <em>Guests</em> Say</h2>
+    <p class="section-eyebrow" id="reviewsEyebrowEl">Guest Voices</p>
+    <h2 class="section-title" id="reviewsTitleEl">What Our <em>Guests</em> Say</h2>
   </div>
   <div class="reviews-grid" id="reviewsGrid"></div>
   <div class="write-review fade-in">
-    <p class="section-eyebrow">Share Your Experience</p>
-    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;margin-bottom:0.25rem">Leave a <em>Review</em></h3>
-    <p style="font-size:12px;color:var(--text-muted)">Your feedback helps us grow and serve you better.</p>
+    <p class="section-eyebrow" id="reviewsShareEyebrowEl">Share Your Experience</p>
+    <h3 id="reviewsShareTitleEl" style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;margin-bottom:0.25rem">Leave a <em>Review</em></h3>
+    <p id="reviewsShareSubEl" style="font-size:12px;color:var(--text-muted)">Your feedback helps us grow and serve you better.</p>
     <div class="star-rating" id="starRating">
       <span class="star-btn active" onclick="setRating(1)">★</span>
       <span class="star-btn active" onclick="setRating(2)">★</span>
@@ -254,7 +255,7 @@
   <div class="footer-grid">
     <div>
       <div class="footer-brand">NOIR</div>
-      <div class="footer-tagline">A sanctuary of taste. Where every meal is a memory crafted with care, passion, and the finest ingredients.</div>
+      <div class="footer-tagline" id="footerTaglineEl">A sanctuary of taste. Where every meal is a memory crafted with care, passion, and the finest ingredients.</div>
       <div class="footer-social">
         <div class="social-btn"><i class="fab fa-facebook"></i></div>
         <div class="social-btn"><i class="fab fa-instagram"></i></div>
@@ -263,14 +264,14 @@
       </div>
     </div>
     <div>
-      <div class="footer-links-title">Navigate</div>
+      <div class="footer-links-title" id="footerNavTitleEl">Navigate</div>
       <div class="footer-links">
         <a onclick="scrollSec('menu')">Menu</a>
         <a onclick="scrollSec('reservation')">Reservation</a>
         <a class="client-only hidden" onclick="scrollSec('loyalty')">Loyalty</a>
         <a class="client-only hidden" onclick="scrollSec('offers')">Offers</a>
         <a onclick="scrollSec('chef')">Our Chef</a>
-        <a onclick="scrollSec('about')">About us</a>z
+        <a onclick="scrollSec('about')">About us</a>
       </div>
     </div>
     <div>
@@ -291,7 +292,7 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2024 NOIR Fine Dining. All rights reserved.</span>
+    <span id="footerCopyEl">© 2024 NOIR Fine Dining. All rights reserved.</span>
     <div style="display:flex;gap:2rem">
       <a style="cursor:pointer;color:inherit">Privacy Policy</a>
       <a style="cursor:pointer;color:inherit">Terms of Service</a>
@@ -304,19 +305,19 @@
 <div id="tracker-backdrop" onclick="toggleTrackerSidebar(false)"></div>
 <aside id="tracker-sidebar">
   <div class="tracker-header">
-    <div class="tracker-title">Track Your Order</div>
+    <div class="tracker-title" id="trackerTitleEl">Track Your Order</div>
     <button class="tracker-close" onclick="toggleTrackerSidebar(false)">✕</button>
   </div>
   <div class="tracker-body">
-    <p class="section-sub" style="max-width:none">Enter your order number for real-time status updates.</p>
+    <p class="section-sub" id="trackerSubEl" style="max-width:none">Enter your order number for real-time status updates.</p>
     <div class="tracker-input" style="margin-top:1rem">
       <div class="form-group">
         <label class="form-label" for="trackInput">Order Number</label>
         <input class="form-input" placeholder="e.g. NOIR-24-0847" id="trackInput">
       </div>
-      <button class="submit-btn" onclick="trackOrder()">Track Order</button>
+      <button class="submit-btn" id="trackerBtnEl" onclick="trackOrder()">Track Order</button>
     </div>
-    <div class="tracker-empty" id="trackerEmpty" style="margin-top:1rem">Enter your order number to load the live tracking timeline.</div>
+    <div class="tracker-empty" id="trackerEmptyEl" style="margin-top:1rem">Enter your order number to load the live tracking timeline.</div>
     <div id="trackerSteps" style="margin-top:1rem"></div>
   </div>
 </aside>
@@ -347,7 +348,7 @@
 <div class="chat-bubble" id="chatBubble">
   <div class="chat-head">
     <div class="chat-avatar"><i class="fas fa-chef-hat"></i></div>
-    <div class="chat-head-info"><div class="chat-head-name">NOIR Chatbot</div><div class="chat-head-status">● Online now</div></div>
+    <div class="chat-head-info"><div class="chat-head-name" id="chatHeadNameEl">NOIR Chatbot</div><div class="chat-head-status" id="chatHeadStatusEl">● Online now</div></div>
     <button onclick="toggleChat()" style="background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-size:16px">✕</button>
   </div>
   <div class="chat-messages" id="chatMessages">
@@ -595,6 +596,7 @@
   </div>
 </div>
 
+<script src="translations.js"></script>
 <script src="app.js?v=2"></script>
 
 </body>

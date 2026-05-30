@@ -78,6 +78,15 @@ function setActiveView(viewName) {
   document.querySelectorAll('.nav-btn').forEach((button) => {
     button.classList.toggle('active', button.dataset.viewTarget === viewName);
   });
+  // Re-fill allergen select when switching to allergens view
+  if (viewName === 'allergens') {
+    _fillAllergenSelect();
+    setTimeout(_fillAllergenSelect, 100);
+  }
+  // Load admin profile when navigating to account view
+  if (viewName === 'account') {
+    loadAdminProfile();
+  }
 }
 
 function renderStats(overview) {
@@ -415,6 +424,7 @@ function resetStaffForm() {
   document.getElementById('staffFormTitle').textContent = 'Add Staff';
   document.getElementById('staffCancel').classList.add('hidden');
   document.getElementById('staffRole').value = 'chef';
+  document.getElementById('staffPhotoPreview').src = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 fill=%23212121/%3E%3Ccircle cx=%2232%22 cy=%2220%22 r=%2212%22 fill=%23fff/%3E%3Cpath d=%22M16 54c0-12 16-16 16-16s16 4 16 16H16z%22 fill=%23fff/%3E%3C/svg%3E";
 }
 
 function exportValue(value) {
@@ -837,7 +847,21 @@ function startStaffEditById(id) {
   document.getElementById('staffUsername').value = item.username || '';
   document.getElementById('staffPassword').value = '';
   document.getElementById('staffRole').value = item.role || 'chef';
+  document.getElementById('staffFirstName').value = item.firstName || '';
+  document.getElementById('staffLastName').value = item.lastName || '';
+  document.getElementById('staffEmail').value = item.email || '';
+  document.getElementById('staffPhone').value = item.phone || '';
+  document.getElementById('staffBirthDate').value = item.birthDate || '';
+  if (item.profilePicture) document.getElementById('staffPhotoPreview').src = item.profilePicture;
   document.getElementById('staffCancel').classList.remove('hidden');
+}
+
+function previewStaffPhoto(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => { document.getElementById('staffPhotoPreview').src = e.target.result; };
+    reader.readAsDataURL(input.files[0]);
+  }
 }
 
 async function deleteIngredient(id) {
@@ -912,6 +936,7 @@ async function loadAllData() {
   renderIngredients(ingredients);
   renderTables(tables);
   renderStaff(staff);
+  renderAllergens(menu, reservations);
 }
 
 document.getElementById('loginForm').addEventListener('submit', async (event) => {
@@ -1098,10 +1123,21 @@ document.getElementById('tableForm').addEventListener('submit', async (event) =>
 document.getElementById('staffForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   try {
+    const fileInput = document.getElementById('staffPicture');
+    let profilePicture = null;
+    if (fileInput && fileInput.files && fileInput.files[0]) {
+      profilePicture = await toDataURL(fileInput.files[0]);
+    }
     const payload = {
       username: document.getElementById('staffUsername').value.trim(),
       password: document.getElementById('staffPassword').value,
       role: document.getElementById('staffRole').value,
+      firstName: document.getElementById('staffFirstName').value.trim(),
+      lastName: document.getElementById('staffLastName').value.trim(),
+      email: document.getElementById('staffEmail').value.trim(),
+      phone: document.getElementById('staffPhone').value.trim(),
+      birthDate: document.getElementById('staffBirthDate').value,
+      profilePicture,
     };
 
     if (state.staffEditId) {
@@ -1264,15 +1300,26 @@ function filterKitchenMenu(filter, role) {
 
 // ─── ACCOUNT ────────────────────────────────────────────────────────────────
 
-function toDataURL(file) {
+function toDataURL(file, maxSize = 800) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
+    reader.onerror = () => reject(new Error('Read failed'));
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Image load failed'));
+      img.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = e.target.result;
+    };
     reader.readAsDataURL(file);
   });
 }
-
 
 function switchAdminTab(mode) {
   const isProfile = mode === 'profile';
@@ -1303,6 +1350,8 @@ async function loadAdminProfile() {
 
 async function updateAdminProfile() {
   try {
+    const username = document.getElementById('adminUsername').value.trim();
+    const role = document.getElementById('adminRole').value;
     const firstName = document.getElementById('adminFirstName').value.trim();
     const lastName = document.getElementById('adminLastName').value.trim();
     const email = document.getElementById('adminEmail').value.trim();
@@ -1315,11 +1364,11 @@ async function updateAdminProfile() {
     }
     await adminFetch('/me', {
       method: 'PUT',
-      body: JSON.stringify({ firstName, lastName, email, phone, birthDate, profilePicture })
+      body: JSON.stringify({ username, role, firstName, lastName, email, phone, birthDate, profilePicture })
     });
     showToast('Profile updated', 'gold');
   } catch (err) {
-    showToast('Failed to update profile', 'error');
+    showToast(err.message || 'Failed to update profile', 'error');
   }
 }
 
@@ -1335,9 +1384,210 @@ async function changeAdminPassword() {
     return;
   }
   try {
-    // For admin, since no update endpoint, perhaps not supported
-    showToast('Password change not supported for admin', 'error');
+    await adminFetch('/me/password', {
+      method: 'PUT',
+      body: JSON.stringify({ oldPassword, newPassword }),
+    });
+    document.getElementById('adminOldPassword').value = '';
+    document.getElementById('adminNewPassword').value = '';
+    showToast('Password updated successfully');
   } catch (err) {
     showToast(err.message, 'error');
+  }
+}
+
+
+
+// ─── Allergens Dashboard ───────────────────────────────────────────────────
+
+function renderAllergens(menu, reservations) {
+  // Normalize API responses — backend wraps data in {success, data}
+  const menuList = Array.isArray(menu) ? menu : (menu?.data || []);
+  const resList = Array.isArray(reservations) ? reservations : (reservations?.data || reservations?.content || []);
+
+  // 1. Menu allergens table
+  populateAllergenDishSelect(menuList);
+  const tbody = document.getElementById('allergensMenuTable');
+  if (tbody) {
+    if (menuList.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-muted)">No dishes found.</td></tr>';
+    } else {
+      tbody.innerHTML = menuList.map(d => `
+        <tr>
+          <td><strong>${escA(d.name)}</strong></td>
+          <td>${escA(d.cat || d.category || '')}</td>
+          <td>${(d.allergens && d.allergens.length > 0) ? d.allergens.map(a => `<span class="badge">${escA(a)}</span>`).join('') : '<span style="color:var(--text-muted);font-size:12px">None</span>'}</td>
+          <td>${d.veg ? 'X' : '—'}</td>
+          <td><button class="btn-ghost btn-small" type="button" onclick="editDishAllergens('${d.id}')">Edit</button></td>
+        </tr>`).join('');
+    }
+  }
+
+  // 2. Allergen frequency stats cards
+  const statsCards = document.getElementById('allergenStatsCards');
+  if (statsCards) {
+    const freq = {};
+    menuList.forEach(d => (d.allergens || []).forEach(a => { freq[a] = (freq[a] || 0) + 1; }));
+    const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+    const totalDishesWithAllergens = menuList.filter(d => d.allergens && d.allergens.length > 0).length;
+    const summaryCards = [
+      { label: 'Dishes with Allergens', value: totalDishesWithAllergens, color: '#c0392b' },
+      { label: 'Allergen Types', value: sorted.length, color: 'var(--gold)' },
+    ];
+    const allergenCards = sorted.slice(0, 6).map(([name, count]) => ({ label: name, value: count + ' dish' + (count > 1 ? 'es' : ''), color: 'var(--border)' }));
+    statsCards.innerHTML = [...summaryCards, ...allergenCards].map(c => `
+      <div style="background:var(--dark);border:0.5px solid ${c.color};border-radius:8px;padding:14px 20px;min-width:140px;flex:1">
+        <div style="font-size:22px;font-weight:600;color:${c.color}">${c.value}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;text-transform:uppercase;letter-spacing:1px">${c.label}</div>
+      </div>`).join('');
+  }
+
+  // 3. Reservations with allergy declarations
+  const resTbody = document.getElementById('allergensReservationsTable');
+  if (resTbody) {
+    const withAllergies = resList.filter(r =>
+      (r.allergySelections && r.allergySelections.length > 0) || r.allergyOther
+    );
+    if (withAllergies.length === 0) {
+      resTbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-muted)">No allergy declarations found in reservations.</td></tr>';
+    } else {
+      resTbody.innerHTML = withAllergies.map(r => `
+        <tr>
+          <td><strong>${escA(r.firstName || '')} ${escA(r.lastName || '')}</strong></td>
+          <td>${escA(r.date || '')}</td>
+          <td>${escA(String(r.guests || ''))}</td>
+          <td>
+            ${(r.allergySelections || []).map(a => `<span style="background:#3a1a1a;border:0.5px solid #c0392b;color:#e74c3c;padding:2px 8px;border-radius:4px;font-size:11px;margin-right:4px">${escA(a)}</span>`).join('')}
+            ${r.allergyOther ? `<span style="background:var(--dark);border:0.5px solid var(--border);color:var(--text-muted);padding:2px 8px;border-radius:4px;font-size:11px">${escA(r.allergyOther)}</span>` : ''}
+          </td>
+          <td style="font-size:12px;color:var(--text-muted)">${escA(r.specialRequests || '—')}</td>
+        </tr>`).join('');
+    }
+  }
+}
+
+function exportAllergens(format) {
+  const rows = [];
+  document.querySelectorAll('#allergensMenuTable tr').forEach(tr => {
+    const cells = [...tr.querySelectorAll('td,th')].map(td => td.innerText);
+    if (cells.length) rows.push(cells);
+  });
+  if (format === 'xlsx') {
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([['Dish','Category','Allergens','Vegetarian'], ...rows]);
+    XLSX.utils.book_append_sheet(wb, ws, 'Allergens');
+    XLSX.writeFile(wb, 'allergens.xlsx');
+  } else {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.text('NOIR — Allergen Report', 14, 16);
+    doc.autoTable({ head: [['Dish','Category','Allergens','Vegetarian']], body: rows, startY: 22 });
+    doc.save('allergens.pdf');
+  }
+}
+
+// ─── Allergen Editor ───────────────────────────────────────────────────────
+
+let allergenCurrentList = [];
+let allergenAllMenu = [];
+
+function populateAllergenDishSelect(menuList) {
+  allergenAllMenu = menuList;
+  // Try immediately, and also after a short delay in case the view is not yet visible
+  _fillAllergenSelect();
+}
+
+function _fillAllergenSelect() {
+  const sel = document.getElementById('allergenDishSelect');
+  if (!sel) return;
+  if (allergenAllMenu.length === 0) return; // don't overwrite with empty if data not loaded yet
+  sel.innerHTML = '<option value="">— choose a dish —</option>' +
+    allergenAllMenu.map(d => `<option value="${d.id}">${escA(d.name)}</option>`).join('');
+  sel.onchange = () => {
+    const dish = allergenAllMenu.find(d => String(d.id) === String(sel.value));
+    allergenCurrentList = dish ? [...(dish.allergens || [])] : [];
+    renderAllergenTags();
+  };
+}
+
+function escA(v) { return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function renderAllergenTags() {
+  const container = document.getElementById('allergenCurrentTags');
+  if (!container) return;
+  if (allergenCurrentList.length === 0) {
+    container.innerHTML = '<span style="color:var(--text-muted);font-size:12px">No allergens yet</span>';
+    return;
+  }
+  container.innerHTML = allergenCurrentList.map((a, i) => `
+    <span style="background:var(--dark);border:0.5px solid var(--gold);color:var(--gold);padding:3px 10px;border-radius:4px;font-size:12px;display:flex;align-items:center;gap:6px">
+      ${escA(a)}
+      <span onclick="removeAllergenTag(${i})" style="cursor:pointer;color:var(--text-muted);font-size:14px;line-height:1">&times;</span>
+    </span>`).join('');
+}
+
+function removeAllergenTag(index) {
+  allergenCurrentList.splice(index, 1);
+  renderAllergenTags();
+}
+
+function addAllergenTag() {
+  const sel = document.getElementById('allergenSelect');
+  const val = sel.value.trim();
+  if (!val) return;
+  if (!allergenCurrentList.includes(val)) {
+    allergenCurrentList.push(val);
+    renderAllergenTags();
+  }
+  sel.value = '';
+}
+
+function addCustomAllergenTag() {
+  const input = document.getElementById('allergenCustom');
+  const val = input.value.trim();
+  if (!val) return;
+  if (!allergenCurrentList.includes(val)) {
+    allergenCurrentList.push(val);
+    renderAllergenTags();
+  }
+  input.value = '';
+}
+
+function editDishAllergens(dishId) {
+  const sel = document.getElementById('allergenDishSelect');
+  if (sel) {
+    sel.value = String(dishId);
+    sel.dispatchEvent(new Event('change'));
+    document.getElementById('allergenForm').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+async function saveAllergens() {
+  const sel = document.getElementById('allergenDishSelect');
+  const dishId = sel.value;
+  if (!dishId) { showToast('Please select a dish first', 'error'); return; }
+  const dish = allergenAllMenu.find(d => String(d.id) === String(dishId));
+  if (!dish) { showToast('Dish not found', 'error'); return; }
+  try {
+    const payload = {
+      name: dish.name,
+      cat: dish.cat || dish.category || '',
+      image: dish.image || '',
+      price: dish.price || 0,
+      desc: dish.desc || dish.description || '',
+      allergens: allergenCurrentList,
+      rating: dish.rating || 0,
+      reviews: dish.reviews || 0,
+      badges: dish.badges || [],
+      veg: dish.veg || false
+    };
+    await adminFetch(`/menu/${dishId}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    });
+    showToast('Allergens saved!', 'gold');
+    await loadAllData();
+  } catch (err) {
+    showToast('Failed to save allergens: ' + err.message, 'error');
   }
 }

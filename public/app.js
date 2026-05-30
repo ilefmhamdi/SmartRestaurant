@@ -738,7 +738,7 @@ async function loadClientOrdersListModal() {
             <div style="color:var(--text-muted);font-size:11px;margin-top:2px">${esc(fmtStatus(o.status))} · ${fmtPrice(o.total)}</div>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-            ${o.status === 'delivered' ? `<button class="btn-ghost btn-small" type="button" onclick="confirmDelivery('${esc(o.orderNumber)}')"><i class="fas fa-check"></i> Confirm</button>` : ''}
+            ${o.status === 'delivered' ? `<button class="btn-ghost btn-small" type="button" onclick="confirmDelivery('${esc(o.orderNumber)}')">Confirm</button>` : ''}
             ${!['cancelled', 'rejected', 'delivered', 'completed'].includes(o.status) ? `<button class="btn-danger btn-small" type="button" onclick="cancelOrderModal('${esc(o.orderNumber)}')">Cancel</button>` : ''}
           </div>
         </div>

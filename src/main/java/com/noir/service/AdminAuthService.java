@@ -7,6 +7,7 @@ import com.noir.model.AdminProfile;
 import com.noir.repository.JsonRepository;
 import com.noir.security.TokenService;
 import org.springframework.stereotype.Service;
+import com.noir.dto.request.ChangeAdminPasswordRequest;
 
 import java.time.Instant;
 import java.util.List;
@@ -77,5 +78,16 @@ public class AdminAuthService {
         profile.setBirthDate("");
         profile.setProfilePicture(null);
         return profile;
+    }
+
+    public void changeAdminPassword(ChangeAdminPasswordRequest req) {
+        AppConfig.Admin admin = appConfig.getAdmin();
+        if (!req.getOldPassword().equals(admin.getPassword())) {
+            throw new AppException("Incorrect current password", 401);
+        }
+        admin.setPassword(req.getNewPassword());
+        // Persist new password to application.properties
+        // Note: since the password is stored in application.properties (plain text),
+        // runtime changes are in-memory only. To persist, update the properties file.
     }
 }

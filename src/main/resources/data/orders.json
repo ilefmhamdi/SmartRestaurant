@@ -1,1 +1,69 @@
-[ ]
+[ {
+  "orderNumber" : "NOIR-26-474064",
+  "clientId" : "1969d4ab-ee98-4e04-bb9a-d60ab742a053",
+  "customerName" : "Ilef Mhamdi",
+  "customerEmail" : "ilefmhamdi@gmail.com",
+  "status" : "completed",
+  "eta" : "35 mins",
+  "deliveryAddress" : "Soliman, Nabeul",
+  "deliveryTime" : "19:00",
+  "contactPhone" : "+21612345678",
+  "notes" : "",
+  "kitchenNotes" : "Delivery confirmed by client",
+  "chefId" : null,
+  "chefName" : null,
+  "kitchenStaffId" : "elena_chef",
+  "kitchenStaffName" : "elena_chef",
+  "deliveryStaffId" : "yara_delivery",
+  "deliveryStaffName" : "yara_delivery",
+  "undeliveredReason" : null,
+  "rejectedReason" : null,
+  "steps" : [ {
+    "label" : "Order Confirmed",
+    "time" : "Your order has been received",
+    "state" : "done",
+    "icon" : "fa-check"
+  }, {
+    "label" : "Being Prepared",
+    "time" : "Our kitchen is preparing your order",
+    "state" : "done",
+    "icon" : "fa-check"
+  }, {
+    "label" : "Out for Delivery",
+    "time" : "Delivery rider will contact you",
+    "state" : "done",
+    "icon" : "fa-check"
+  }, {
+    "label" : "Delivered",
+    "time" : "Enjoy your meal",
+    "state" : "done",
+    "icon" : "fa-check"
+  } ],
+  "items" : [ {
+    "id" : 3,
+    "name" : "Velouté de Champignons",
+    "quantity" : 1,
+    "price" : 58.0,
+    "image" : "https://i.pinimg.com/1200x/07/dc/03/07dc03a67f79beeeec9ee1fd5ae42f6d.jpg"
+  }, {
+    "id" : 6,
+    "name" : "Magret de Canard",
+    "quantity" : 1,
+    "price" : 120.0,
+    "image" : "https://i.pinimg.com/736x/c0/f2/6a/c0f26a4c05ff228be22ca915327692a1.jpg"
+  }, {
+    "id" : 8,
+    "name" : "Fondant au Chocolat",
+    "quantity" : 1,
+    "price" : 45.0,
+    "image" : "https://i.pinimg.com/736x/c2/b0/59/c2b059bf26348bcb5cbc504a62f4054e.jpg"
+  }, {
+    "id" : 11,
+    "name" : "Champagne Rosé",
+    "quantity" : 1,
+    "price" : 58.0,
+    "image" : "https://i.pinimg.com/1200x/bb/ba/d5/bbbad52eae68095cdd54bbd41f57386a.jpg"
+  } ],
+  "total" : 281.0,
+  "createdAt" : "2026-05-30T10:54:34.064008400Z"
+} ]

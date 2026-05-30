@@ -1,1 +1,22 @@
-[]
+[ {
+  "id" : "67c61f23-13a5-43db-8bd4-feed38ec4348",
+  "name" : "crème fraiche",
+  "stock" : 13,
+  "unit" : "pièce",
+  "available" : true,
+  "notes" : ""
+}, {
+  "id" : "c73b41f1-e599-49c3-9cc0-60fdb6e600e8",
+  "name" : "viandes",
+  "stock" : 4,
+  "unit" : "kg",
+  "available" : true,
+  "notes" : ""
+}, {
+  "id" : "9e7256fe-96d1-4c05-96a5-242086f4c133",
+  "name" : "tomates",
+  "stock" : 3,
+  "unit" : "kg",
+  "available" : true,
+  "notes" : ""
+} ]

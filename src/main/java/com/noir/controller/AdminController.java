@@ -33,9 +33,15 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("success", true, "data", adminAuthService.getAdminProfile()));
     }
 
-    @PutMapping("/me")
-    public ResponseEntity<?> updateProfile(@Valid @RequestBody com.noir.dto.request.UpdateAdminProfileRequest req) {
-        return ResponseEntity.ok(Map.of("success", true, "message", "Profile updated successfully", "data", adminAuthService.updateAdminProfile(req)));
+    @RequestMapping(value = "/me", method = {RequestMethod.PUT, RequestMethod.POST})
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateAdminProfileRequest req) {
+        return ResponseEntity.ok(Map.of("success", true, "data", adminAuthService.updateAdminProfile(req)));
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<?> changePassword(@Valid @RequestBody com.noir.dto.request.ChangeAdminPasswordRequest req) {
+        adminAuthService.changeAdminPassword(req);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Password updated successfully"));
     }
 
     @GetMapping("/overview")

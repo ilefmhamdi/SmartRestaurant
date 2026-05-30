@@ -1,10 +1,10 @@
 [ {
   "username" : "admin",
   "role" : "admin",
-  "firstName" : "",
-  "lastName" : "",
-  "email" : "",
-  "phone" : null,
-  "birthDate" : null,
-  "profilePicture" : null
+  "firstName" : "admin",
+  "lastName" : "admin",
+  "email" : "admin@restaurant.tn",
+  "phone" : "12345678",
+  "birthDate" : "1991-06-05",
+  "profilePicture" :null
 } ]

@@ -39,9 +39,9 @@ public class StaffAuthService {
     public Map<String, Object> login(StaffLoginRequest req) {
         List<StaffUser> staff = staffRepo.read();
         StaffUser user = staff.stream()
-                .filter(u -> u.getUsername().equalsIgnoreCase(req.getUsername()))
-                .findFirst()
-                .orElseThrow(() -> new AppException("Invalid username or password", 401));
+            .filter(u -> u.getUsername() != null && u.getUsername().equalsIgnoreCase(req.getUsername()))
+            .findFirst()
+            .orElseThrow(() -> new AppException("Invalid username or password", 401));
 
         if (!hashPassword(req.getPassword(), user.getSalt()).equals(user.getPasswordHash())) {
             throw new AppException("Invalid username or password", 401);
@@ -103,7 +103,7 @@ public class StaffAuthService {
             throw new AppException("Invalid role. Must be chef, kitchen, or delivery", 400);
         }
         List<StaffUser> staff = staffRepo.read();
-        if (staff.stream().anyMatch(u -> u.getUsername().equalsIgnoreCase(req.getUsername()))) {
+        if (staff.stream().anyMatch(u -> u.getUsername() != null && u.getUsername().equalsIgnoreCase(req.getUsername()))) {
             throw new AppException("Username already taken", 409);
         }
 
@@ -134,8 +134,8 @@ public class StaffAuthService {
         if (idx < 0) throw new AppException("Staff member not found", 404);
 
         StaffUser user = staff.get(idx);
-        if (!user.getUsername().equalsIgnoreCase(req.getUsername()) &&
-            staff.stream().anyMatch(u -> u.getUsername().equalsIgnoreCase(req.getUsername()))) {
+        if (user.getUsername() != null && !user.getUsername().equalsIgnoreCase(req.getUsername()) &&
+            staff.stream().anyMatch(u -> u.getUsername() != null && u.getUsername().equalsIgnoreCase(req.getUsername()))) {
             throw new AppException("Username already taken", 409);
         }
 
@@ -163,7 +163,7 @@ public class StaffAuthService {
     // ---------------------------------------------------------------
     public Map<String, Boolean> deleteStaff(String id) {
         List<StaffUser> staff = staffRepo.read();
-        boolean removed = staff.removeIf(u -> u.getId().equals(id));
+        boolean removed = staff.removeIf(u -> u.getId() != null && u.getId().equals(id));
         if (!removed) throw new AppException("Staff member not found", 404);
         staffRepo.write(staff);
         return Map.of("success", true);
